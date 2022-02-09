@@ -4,6 +4,7 @@
     "type": "symfony-bundle",
     "require": {
         "php": "^7.3|^8.0",
+        "ext-json": "*",
         "symfony/messenger": "^4.4|^5.0|^6.0",
         "symfony/http-kernel": "^4.4|^5.0|^6.0",
         "symfony/dependency-injection": "^4.4|^5.0|^6.0",
