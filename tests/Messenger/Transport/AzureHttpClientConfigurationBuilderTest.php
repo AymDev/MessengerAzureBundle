@@ -16,11 +16,11 @@ final class AzureHttpClientConfigurationBuilderTest extends TestCase
      */
     public function testDefaultConfiguration(bool $isSender, array $configuration): void
     {
-        self::assertIsArray($configuration);
         self::assertArrayHasKey('endpoint', $configuration);
         self::assertArrayHasKey('options', $configuration);
 
         // It MUST end with a trailing slash
+        self::assertStringEndsWith('/', $configuration['endpoint']);
         self::assertSame('https://namespace.servicebus.windows.net/entity/', $configuration['endpoint']);
 
         if ($isSender) {
@@ -91,7 +91,8 @@ final class AzureHttpClientConfigurationBuilderTest extends TestCase
             'transport_name' => 'test-transport',
             'entity_path' => 'entity',
             'token_expiry' => 3600,
-            'receive_mode' => 'peek-lock'
+            'receive_mode' => 'peek-lock',
+            'subscription' => null,
         ]);
     }
 }

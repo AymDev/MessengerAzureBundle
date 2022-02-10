@@ -104,7 +104,7 @@ final class AzureBrokerPropertiesStampTest extends TestCase
         $scheduledEnqueueTimeUtc = '1970-01-01 00:00:00';
         $replyToSessionId = 'test-reply-to-session-id';
         $partitionKey = 'test-partition-key';
-    
+
         $httpClient = new MockHttpClient([
             new MockResponse('', [
                 'response_headers' => [
@@ -168,16 +168,17 @@ final class AzureBrokerPropertiesStampTest extends TestCase
     {
         $stamp = new AzureBrokerPropertiesStamp(
             'test-content-type',
-                null,
-                null,
-                null,
-                new \DateTime('1970-01-01 00:00:00')
+            null,
+            null,
+            null,
+            new \DateTime('1970-01-01 00:00:00')
         );
 
         $json = $stamp->encode();
         self::assertJson($json);
 
         $properties = json_decode($json, true);
+        self::assertIsArray($properties);
         self::assertArrayHasKey('ContentType', $properties);
         self::assertSame('test-content-type', $properties['ContentType']);
         self::assertArrayNotHasKey('CorrelationId', $properties);

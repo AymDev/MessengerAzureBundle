@@ -38,7 +38,6 @@ final class AzureTransportFactoryTest extends TestCase
             'azure://KeyName:Key@namespace',
             [
                 'transport_name' => 'test-transport',
-                'entity_path' => null,
             ],
             self::createMock(SerializerInterface::class)
         );

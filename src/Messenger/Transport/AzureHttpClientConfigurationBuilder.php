@@ -15,8 +15,8 @@ final class AzureHttpClientConfigurationBuilder
      * @param array{
      *     transport_name: string,
      *     entity_path: string,
-     *     subscription?: string|null,
-     *     token_expiry: int
+     *     subscription: string|null,
+     *     token_expiry: int,
      *     receive_mode: string
      * } $options
      * @return array{endpoint: string, options: mixed[]}
@@ -31,8 +31,8 @@ final class AzureHttpClientConfigurationBuilder
      * @param array{
      *     transport_name: string,
      *     entity_path: string,
-     *     subscription?: string|null,
-     *     token_expiry: int
+     *     subscription: string|null,
+     *     token_expiry: int,
      *     receive_mode: string
      * } $options
      * @return array{endpoint: string, options: mixed[]}
@@ -46,8 +46,8 @@ final class AzureHttpClientConfigurationBuilder
      * @param array{
      *     transport_name: string,
      *     entity_path: string,
-     *     subscription?: string|null,
-     *     token_expiry: int
+     *     subscription: string|null,
+     *     token_expiry: int,
      *     receive_mode: string
      * } $options
      * @return array{endpoint: string, options: mixed[]}

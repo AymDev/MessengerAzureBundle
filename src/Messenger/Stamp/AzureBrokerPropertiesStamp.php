@@ -107,6 +107,27 @@ class AzureBrokerPropertiesStamp implements StampInterface
     public static function createFromResponse(ResponseInterface $response): self
     {
         $header = $response->getHeaders()['brokerproperties'][0] ?? '';
+
+        /**
+         * @var null|array{
+         *     ContentType?: string,
+         *     CorrelationId?: string,
+         *     SessionID?: string,
+         *     DeliveryCount?: int,
+         *     LockedUntilUtc?: string,
+         *     LockToken?: string,
+         *     MessageId?: string,
+         *     Label?: string,
+         *     ReplyTo?: string,
+         *     EnqueuedTimeUtc?: string,
+         *     SequenceNumber?: int,
+         *     TimeToLive?: int,
+         *     To?: string,
+         *     ScheduledEnqueueTimeUtc?: string,
+         *     ReplyToSessionId?: string,
+         *     PartitionKey?: string
+         * } $properties
+         */
         $properties = json_decode($header, true);
 
         return new self(
@@ -137,6 +158,7 @@ class AzureBrokerPropertiesStamp implements StampInterface
 
     /**
      * Encode the broker properties in JSON for sending to Azure Service Bus
+     * @throws \JsonException
      * @internal
      */
     public function encode(): string
@@ -170,7 +192,7 @@ class AzureBrokerPropertiesStamp implements StampInterface
             return !is_null($property);
         });
 
-        return json_encode($properties, JSON_FORCE_OBJECT);
+        return json_encode($properties, JSON_FORCE_OBJECT | JSON_THROW_ON_ERROR);
     }
 
     public function getContentType(): ?string

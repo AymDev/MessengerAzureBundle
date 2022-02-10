@@ -43,13 +43,7 @@ final class AzureTransportFactory implements TransportFactoryInterface
     }
 
     /**
-     * @param array{
-     *     transport_name: string,
-     *     entity_path?: string,
-     *     subscription?: string|null,
-     *     token_expiry?: int
-     *     receive_mode?: string
-     * } $options
+     * @param mixed[] $options
      */
     public function createTransport(string $dsn, array $options, SerializerInterface $serializer): TransportInterface
     {
@@ -72,24 +66,27 @@ final class AzureTransportFactory implements TransportFactoryInterface
 
     /**
      * Validate options and set default values
-     * @param array{
-     *     transport_name: string,
-     *     entity_path?: string,
-     *     subscription?: string|null,
-     *     token_expiry?: int
-     *     receive_mode?: string
-     * } $options
+     * @param mixed[] $options
      * @return array{
      *     transport_name: string,
      *     entity_path: string,
-     *     subscription?: string|null,
-     *     token_expiry: int
+     *     subscription: string|null,
+     *     token_expiry: int,
      *     receive_mode: string
      * }
      */
     private function validateOptions(array $options): array
     {
         // Set default values
+        /**
+         * @var array{
+         *     transport_name: string,
+         *     entity_path: string|null,
+         *     subscription: string|null,
+         *     token_expiry: int,
+         *     receive_mode: string
+         * } $options
+         */
         $options = array_merge(self::DEFAULT_OPTIONS, $options);
 
         // Missing topic or queue name

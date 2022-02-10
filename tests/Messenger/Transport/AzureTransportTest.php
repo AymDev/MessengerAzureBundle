@@ -116,8 +116,6 @@ final class AzureTransportTest extends TestCase
         self::assertCount(1, $result);
 
         $envelope = $result[0];
-        self::assertInstanceOf(Envelope::class, $envelope);
-
         $azureReceivedStamp = $envelope->last(AzureReceivedStamp::class);
         self::assertInstanceOf(AzureReceivedStamp::class, $azureReceivedStamp);
 
@@ -133,7 +131,7 @@ final class AzureTransportTest extends TestCase
     }
 
     /**
-     * @return array{int, string, bool}
+     * @return array{int, string, bool}[]
      */
     public function provideValidGetCases(): array
     {
@@ -178,7 +176,10 @@ final class AzureTransportTest extends TestCase
         );
 
         $envelope = new Envelope(new class {});
-        call_user_func([$transport, $methodName], $envelope);
+
+        /** @var callable $method */
+        $method = [$transport, $methodName];
+        call_user_func($method, $envelope);
     }
 
     /**
@@ -209,7 +210,10 @@ final class AzureTransportTest extends TestCase
         $envelope = new Envelope(new class {}, [
             new AzureReceivedStamp('message', $expectedUrl),
         ]);
-        call_user_func([$transport, $methodName], $envelope);
+
+        /** @var callable $method */
+        $method = [$transport, $methodName];
+        call_user_func($method, $envelope);
     }
 
     /**
@@ -232,7 +236,10 @@ final class AzureTransportTest extends TestCase
         $envelope = new Envelope(new class {}, [
             new AzureReceivedStamp('message', null),
         ]);
-        call_user_func([$transport, $methodName], $envelope);
+
+        /** @var callable $method */
+        $method = [$transport, $methodName];
+        call_user_func($method, $envelope);
     }
 
     /**
@@ -255,7 +262,10 @@ final class AzureTransportTest extends TestCase
         $envelope = new Envelope(new class {}, [
             new AzureBrokerPropertiesStamp(),
         ]);
-        call_user_func([$transport, $methodName], $envelope);
+
+        /** @var callable $method */
+        $method = [$transport, $methodName];
+        call_user_func($method, $envelope);
     }
 
     /**
@@ -278,7 +288,10 @@ final class AzureTransportTest extends TestCase
 
 
         $envelope = new Envelope(new class {}, [$stamp]);
-        call_user_func([$transport, $methodName], $envelope);
+
+        /** @var callable $method */
+        $method = [$transport, $methodName];
+        call_user_func($method, $envelope);
     }
 
     /**
@@ -362,7 +375,10 @@ final class AzureTransportTest extends TestCase
                 $messageId
             ),
         ]);
-        call_user_func([$transport, $methodName], $envelope);
+
+        /** @var callable $method */
+        $method = [$transport, $methodName];
+        call_user_func($method, $envelope);
     }
 
     /**
@@ -389,7 +405,10 @@ final class AzureTransportTest extends TestCase
         $envelope = new Envelope(new class {}, [
             new AzureReceivedStamp('message', 'https://delete-location'),
         ]);
-        call_user_func([$transport, $methodName], $envelope);
+
+        /** @var callable $method */
+        $method = [$transport, $methodName];
+        call_user_func($method, $envelope);
     }
 
     /**
@@ -429,6 +448,29 @@ final class AzureTransportTest extends TestCase
         $transport = new AzureTransport(
             $serializer,
             $sender,
+            new MockHttpClient(),
+            AzureTransport::RECEIVE_MODE_RECEIVE_AND_DELETE
+        );
+
+        $transport->send($envelope);
+    }
+
+    /**
+     * JSON encoding exception of the BrokerProperties must throw a transport exception
+     */
+    public function testSendWithBrokerPropertiesJsonErrorThrowsTransportException(): void
+    {
+        self::expectException(TransportException::class);
+        self::expectExceptionCode(1644511135);
+
+        $envelope = new Envelope(new class {}, [
+            // Send "Malformed UTF-8 characters"
+            new AzureBrokerPropertiesStamp("\xB1\x31"),
+        ]);
+
+        $transport = new AzureTransport(
+            self::createMock(SerializerInterface::class),
+            new MockHttpClient(),
             new MockHttpClient(),
             AzureTransport::RECEIVE_MODE_RECEIVE_AND_DELETE
         );

@@ -125,7 +125,11 @@ final class AzureTransport implements TransportInterface
         /** @var null|AzureBrokerPropertiesStamp $brokerProperties */
         $brokerProperties = $envelope->last(AzureBrokerPropertiesStamp::class);
         if (null !== $brokerProperties) {
-            $additionalHeaders['BrokerProperties'] = $brokerProperties->encode();
+            try {
+                $additionalHeaders['BrokerProperties'] = $brokerProperties->encode();
+            } catch (\JsonException $e) {
+                throw new TransportException('Could not encode the "BrokerProperties" header.', 1644511135, $e);
+            }
         }
 
         // Decode message
