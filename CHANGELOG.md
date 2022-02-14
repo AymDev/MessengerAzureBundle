@@ -6,10 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2022-02-14
+### Added
+ - **AzureMessageStamp** stamp for sent/received messages with *queue*/*topic* name, message, subscription name and delete location
+
+### Deprecated
+ - **AzureReceivedStamp** in favor of the new **AzureMessageStamp**
+
 ## [1.0.0] - 2022-02-10
 ### Added
  - **Symfony Messenger** transport for **Azure Service Bus** *queues* and *topics*
 
-[Unreleased]: https://github.com/AymDev/MessengerAzureBundle/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/AymDev/MessengerAzureBundle/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/AymDev/MessengerAzureBundle/releases/tag/v1.1.0
 [1.0.0]: https://github.com/AymDev/MessengerAzureBundle/releases/tag/v1.0.0
 

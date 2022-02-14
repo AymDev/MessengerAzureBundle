@@ -61,7 +61,14 @@ final class AzureTransportFactory implements TransportFactoryInterface
             $receiverConfiguration['options']
         );
 
-        return new AzureTransport($serializer, $senderClient, $receiverClient, $options['receive_mode']);
+        return new AzureTransport(
+            $serializer,
+            $senderClient,
+            $receiverClient,
+            $options['receive_mode'],
+            $options['entity_path'],
+            $options['subscription']
+        );
     }
 
     /**

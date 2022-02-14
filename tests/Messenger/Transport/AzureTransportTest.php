@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\AymDev\MessengerAzureBundle\Messenger\Transport;
 
+use AymDev\MessengerAzureBundle\Messenger\Stamp\AzureMessageStamp;
 use AymDev\MessengerAzureBundle\Messenger\Transport\AzureTransport;
 use AymDev\MessengerAzureBundle\Messenger\Stamp\AzureBrokerPropertiesStamp;
 use AymDev\MessengerAzureBundle\Messenger\Stamp\AzureReceivedStamp;
@@ -35,7 +36,8 @@ final class AzureTransportTest extends TestCase
             self::createMock(SerializerInterface::class),
             new MockHttpClient(),
             $httpReceiver,
-            AzureTransport::RECEIVE_MODE_PEEK_LOCK
+            AzureTransport::RECEIVE_MODE_PEEK_LOCK,
+            'entity'
         );
 
         $transport->get();
@@ -54,7 +56,8 @@ final class AzureTransportTest extends TestCase
             self::createMock(SerializerInterface::class),
             new MockHttpClient(),
             $httpReceiver,
-            AzureTransport::RECEIVE_MODE_PEEK_LOCK
+            AzureTransport::RECEIVE_MODE_PEEK_LOCK,
+            'entity'
         );
 
         self::assertSame([], $transport->get());
@@ -76,7 +79,8 @@ final class AzureTransportTest extends TestCase
             self::createMock(SerializerInterface::class),
             new MockHttpClient(),
             $httpReceiver,
-            AzureTransport::RECEIVE_MODE_PEEK_LOCK
+            AzureTransport::RECEIVE_MODE_PEEK_LOCK,
+            'entity'
         );
 
         $transport->get();
@@ -86,29 +90,45 @@ final class AzureTransportTest extends TestCase
      * Read messages must be returned in an envelope with specific stamps
      * @dataProvider provideValidGetCases
      */
-    public function testGetHasStamps(int $statusCode, string $receiveMode, bool $hasBrokerPropertyMessageId): void
-    {
+    public function testGetHasStamps(
+        int $statusCode,
+        string $receiveMode,
+        bool $hasBrokerPropertyMessageId,
+        ?string $subscriptionName,
+        ?string $location
+    ): void {
         $serializer = self::createMock(SerializerInterface::class);
         $serializer->expects(self::once())
             ->method('decode')
             ->willReturn(new Envelope(new class {}));
 
-        $httpReceiver = new MockHttpClient(new MockResponse('test-body', [
+        $body = 'test-body';
+        $entityPath = 'test-entity';
+
+        $headers = [
+            'BrokerProperties' => json_encode(
+                $hasBrokerPropertyMessageId
+                    ? ['MessageId' => 'test-message-id']
+                    : []
+            ),
+        ];
+
+        if (null !== $location) {
+            $headers['Location'] = $location;
+        }
+
+        $httpReceiver = new MockHttpClient(new MockResponse($body, [
             'http_code' => $statusCode,
-            'response_headers' => [
-                'BrokerProperties' => json_encode(
-                    $hasBrokerPropertyMessageId
-                        ? ['MessageId' => 'test-message-id']
-                        : []
-                ),
-            ],
+            'response_headers' => $headers,
         ]));
 
         $transport = new AzureTransport(
             $serializer,
             new MockHttpClient(),
             $httpReceiver,
-            $receiveMode
+            $receiveMode,
+            $entityPath,
+            $subscriptionName
         );
 
         $result = $transport->get();
@@ -118,6 +138,18 @@ final class AzureTransportTest extends TestCase
         $envelope = $result[0];
         $azureReceivedStamp = $envelope->last(AzureReceivedStamp::class);
         self::assertInstanceOf(AzureReceivedStamp::class, $azureReceivedStamp);
+
+        $azureMessageStamp = $envelope->last(AzureMessageStamp::class);
+        self::assertInstanceOf(AzureMessageStamp::class, $azureMessageStamp);
+        self::assertSame($entityPath, $azureMessageStamp->getEntityPath());
+        self::assertSame($body, $azureMessageStamp->getMessage());
+        self::assertSame($subscriptionName, $azureMessageStamp->getSubscriptionName());
+
+        if (null !== $location) {
+            self::assertSame($location, $azureMessageStamp->getLocationHeader());
+        } else {
+            self::assertNull($azureMessageStamp->getLocationHeader());
+        }
 
         $azureBrokerPropertiesStamp = $envelope->last(AzureBrokerPropertiesStamp::class);
         self::assertInstanceOf(AzureBrokerPropertiesStamp::class, $azureBrokerPropertiesStamp);
@@ -131,7 +163,7 @@ final class AzureTransportTest extends TestCase
     }
 
     /**
-     * @return array{int, string, bool}[]
+     * @return array{int, string, bool, ?string, ?string}[]
      */
     public function provideValidGetCases(): array
     {
@@ -140,21 +172,29 @@ final class AzureTransportTest extends TestCase
                 200,
                 AzureTransport::RECEIVE_MODE_RECEIVE_AND_DELETE,
                 true,
+                null,
+                null,
             ],
             [
                 200,
                 AzureTransport::RECEIVE_MODE_RECEIVE_AND_DELETE,
                 false,
+                null,
+                null,
             ],
             [
                 201,
                 AzureTransport::RECEIVE_MODE_PEEK_LOCK,
                 true,
+                'test-subscription',
+                'test-location',
             ],
             [
                 201,
                 AzureTransport::RECEIVE_MODE_PEEK_LOCK,
                 false,
+                'test-subscription',
+                'test-location',
             ],
         ];
     }
@@ -172,7 +212,8 @@ final class AzureTransportTest extends TestCase
             self::createMock(SerializerInterface::class),
             new MockHttpClient(),
             $receiver,
-            AzureTransport::RECEIVE_MODE_RECEIVE_AND_DELETE
+            AzureTransport::RECEIVE_MODE_RECEIVE_AND_DELETE,
+            'entity'
         );
 
         $envelope = new Envelope(new class {});
@@ -204,11 +245,12 @@ final class AzureTransportTest extends TestCase
             self::createMock(SerializerInterface::class),
             new MockHttpClient(),
             $receiver,
-            AzureTransport::RECEIVE_MODE_PEEK_LOCK
+            AzureTransport::RECEIVE_MODE_PEEK_LOCK,
+            'entity'
         );
 
         $envelope = new Envelope(new class {}, [
-            new AzureReceivedStamp('message', $expectedUrl),
+            new AzureMessageStamp('entity', 'message', null, $expectedUrl),
         ]);
 
         /** @var callable $method */
@@ -229,12 +271,13 @@ final class AzureTransportTest extends TestCase
             self::createMock(SerializerInterface::class),
             new MockHttpClient(),
             new MockHttpClient(),
-            AzureTransport::RECEIVE_MODE_PEEK_LOCK
+            AzureTransport::RECEIVE_MODE_PEEK_LOCK,
+            'entity'
         );
 
 
         $envelope = new Envelope(new class {}, [
-            new AzureReceivedStamp('message', null),
+            new AzureMessageStamp('entity', 'message'),
         ]);
 
         /** @var callable $method */
@@ -255,7 +298,8 @@ final class AzureTransportTest extends TestCase
             self::createMock(SerializerInterface::class),
             new MockHttpClient(),
             new MockHttpClient(),
-            AzureTransport::RECEIVE_MODE_PEEK_LOCK
+            AzureTransport::RECEIVE_MODE_PEEK_LOCK,
+            'entity'
         );
 
 
@@ -283,7 +327,8 @@ final class AzureTransportTest extends TestCase
             self::createMock(SerializerInterface::class),
             new MockHttpClient(),
             new MockHttpClient(),
-            AzureTransport::RECEIVE_MODE_PEEK_LOCK
+            AzureTransport::RECEIVE_MODE_PEEK_LOCK,
+            'entity'
         );
 
 
@@ -361,7 +406,8 @@ final class AzureTransportTest extends TestCase
             self::createMock(SerializerInterface::class),
             new MockHttpClient(),
             $receiver,
-            AzureTransport::RECEIVE_MODE_PEEK_LOCK
+            AzureTransport::RECEIVE_MODE_PEEK_LOCK,
+            'entity'
         );
 
         $envelope = new Envelope(new class {}, [
@@ -399,11 +445,12 @@ final class AzureTransportTest extends TestCase
             self::createMock(SerializerInterface::class),
             new MockHttpClient(),
             $receiver,
-            AzureTransport::RECEIVE_MODE_PEEK_LOCK
+            AzureTransport::RECEIVE_MODE_PEEK_LOCK,
+            'entity'
         );
 
         $envelope = new Envelope(new class {}, [
-            new AzureReceivedStamp('message', 'https://delete-location'),
+            new AzureMessageStamp('entity', 'message', null, 'https://delete-location'),
         ]);
 
         /** @var callable $method */
@@ -449,7 +496,8 @@ final class AzureTransportTest extends TestCase
             $serializer,
             $sender,
             new MockHttpClient(),
-            AzureTransport::RECEIVE_MODE_RECEIVE_AND_DELETE
+            AzureTransport::RECEIVE_MODE_RECEIVE_AND_DELETE,
+            'entity'
         );
 
         $transport->send($envelope);
@@ -472,7 +520,8 @@ final class AzureTransportTest extends TestCase
             self::createMock(SerializerInterface::class),
             new MockHttpClient(),
             new MockHttpClient(),
-            AzureTransport::RECEIVE_MODE_RECEIVE_AND_DELETE
+            AzureTransport::RECEIVE_MODE_RECEIVE_AND_DELETE,
+            'entity'
         );
 
         $transport->send($envelope);
@@ -498,7 +547,8 @@ final class AzureTransportTest extends TestCase
             $serializer,
             new MockHttpClient(),
             new MockHttpClient(),
-            AzureTransport::RECEIVE_MODE_RECEIVE_AND_DELETE
+            AzureTransport::RECEIVE_MODE_RECEIVE_AND_DELETE,
+            'entity'
         );
 
         $transport->send($envelope);
@@ -534,35 +584,38 @@ final class AzureTransportTest extends TestCase
             $serializer,
             $sender,
             new MockHttpClient(),
-            AzureTransport::RECEIVE_MODE_RECEIVE_AND_DELETE
+            AzureTransport::RECEIVE_MODE_RECEIVE_AND_DELETE,
+            'entity'
         );
 
         $transport->send($envelope);
     }
 
     /**
-     * Sent messages must send the envelope body
+     * Sent messages must send the envelope body and add a message stamp to the envelope
      */
     public function testSendMessageWithBody(): void
     {
         $envelope = new Envelope(new class {});
+        $entityPath = 'test-entity';
+        $body = 'test-body';
 
         $serializer = self::createMock(SerializerInterface::class);
         $serializer->expects(self::once())
             ->method('encode')
             ->with($envelope)
-            ->willReturn(['body' => 'test-body']);
+            ->willReturn(['body' => $body]);
 
         $baseUri = 'https://test-domain.com/test-uri/';
         $expectedUrl = $baseUri . 'messages';
 
         $sender = new MockHttpClient(
-            function (string $method, string $url, array $options) use ($expectedUrl): ResponseInterface {
+            function (string $method, string $url, array $options) use ($expectedUrl, $body): ResponseInterface {
                 self::assertSame('POST', $method);
                 self::assertSame($expectedUrl, $url);
 
                 self::assertArrayHasKey('body', $options);
-                self::assertSame('test-body', $options['body']);
+                self::assertSame($body, $options['body']);
 
                 return new MockResponse();
             },
@@ -573,10 +626,18 @@ final class AzureTransportTest extends TestCase
             $serializer,
             $sender,
             new MockHttpClient(),
-            AzureTransport::RECEIVE_MODE_RECEIVE_AND_DELETE
+            AzureTransport::RECEIVE_MODE_RECEIVE_AND_DELETE,
+            $entityPath
         );
 
-        $transport->send($envelope);
+        $envelope = $transport->send($envelope);
+
+        /** @var null|AzureMessageStamp $stamp */
+        $stamp = $envelope->last(AzureMessageStamp::class);
+
+        self::assertInstanceOf(AzureMessageStamp::class, $stamp);
+        self::assertSame($entityPath, $stamp->getEntityPath());
+        self::assertSame($body, $stamp->getMessage());
     }
 
     /**
@@ -603,7 +664,8 @@ final class AzureTransportTest extends TestCase
             $serializer,
             $sender,
             new MockHttpClient(),
-            AzureTransport::RECEIVE_MODE_RECEIVE_AND_DELETE
+            AzureTransport::RECEIVE_MODE_RECEIVE_AND_DELETE,
+            'entity'
         );
 
         $transport->send($envelope);

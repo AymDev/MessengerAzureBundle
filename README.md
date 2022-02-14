@@ -61,14 +61,25 @@ framework:
 
 This transport provides 2 stamps:
 
-### AzureReceivedStamp
+### AzureMessageStamp
 
-The `AymDev\MessengerAzureBundle\Messenger\Stamp\AzureReceivedStamp` stamp holds the original message body and an optional deletion URL.
+The `AymDev\MessengerAzureBundle\Messenger\Stamp\AzureMessageStamp` stamp is added to sent and received messages and
+contains:
+
+ - the *topic* or *queue* name
+ - the original sent/received message
+ - the subscription name for received messages from *topics*
+ - the delete URL for received messages in `peek-lock` receive mode 
 
 ### AzureBrokerPropertiesStamp
 
 The `AymDev\MessengerAzureBundle\Messenger\Stamp\AzureBrokerPropertiesStamp` stamp is used for the [message properties](https://docs.microsoft.com/en-us/rest/api/servicebus/message-headers-and-properties).
 It is automatically decoded when consuming a message and is encoded when producing a message if added to the *envelope*.
+
+### AzureReceivedStamp
+
+The `AymDev\MessengerAzureBundle\Messenger\Stamp\AzureReceivedStamp` stamp holds the original message body and an optional deletion URL.
+>This stamp is deprecated in favor of the AzureMessageStamp and will be removed in v2.
 
 ## Serialization
 

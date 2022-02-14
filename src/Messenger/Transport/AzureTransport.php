@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AymDev\MessengerAzureBundle\Messenger\Transport;
 
 use AymDev\MessengerAzureBundle\Messenger\Stamp\AzureBrokerPropertiesStamp;
+use AymDev\MessengerAzureBundle\Messenger\Stamp\AzureMessageStamp;
 use AymDev\MessengerAzureBundle\Messenger\Stamp\AzureReceivedStamp;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\TransportException;
@@ -36,16 +37,26 @@ final class AzureTransport implements TransportInterface
     /** @var string */
     private $receiveMode;
 
+    /** @var string */
+    private $entityPath;
+
+    /** @var string|null */
+    private $subscriptionName;
+
     public function __construct(
         SerializerInterface $serializer,
         HttpClientInterface $senderClient,
         HttpClientInterface $receiverClient,
-        string $receiveMode
+        string $receiveMode,
+        string $entityPath,
+        ?string $subscriptionName = null
     ) {
         $this->serializer = $serializer;
         $this->senderClient = $senderClient;
         $this->receiverClient = $receiverClient;
         $this->receiveMode = $receiveMode;
+        $this->entityPath = $entityPath;
+        $this->subscriptionName = $subscriptionName;
     }
 
     /**
@@ -90,6 +101,7 @@ final class AzureTransport implements TransportInterface
         $brokerPropertiesStamp = AzureBrokerPropertiesStamp::createFromResponse($response);
         $envelope = $envelope
             ->with(AzureReceivedStamp::createFromResponse($response))
+            ->with(AzureMessageStamp::createFromResponse($response, $this->entityPath, $this->subscriptionName))
             ->with($brokerPropertiesStamp)
         ;
 
@@ -155,7 +167,11 @@ final class AzureTransport implements TransportInterface
             );
         }
 
-        return $envelope;
+        return $envelope->with(new AzureMessageStamp(
+            $this->entityPath,
+            $encodedMessage['body'],
+            $this->subscriptionName
+        ));
     }
 
     /**
@@ -187,8 +203,8 @@ final class AzureTransport implements TransportInterface
     private function getDeleteUri(Envelope $envelope): string
     {
         // Use delete location URL
-        /** @var null|AzureReceivedStamp $receivedStamp */
-        $receivedStamp = $envelope->last(AzureReceivedStamp::class);
+        /** @var null|AzureMessageStamp $receivedStamp */
+        $receivedStamp = $envelope->last(AzureMessageStamp::class);
 
         if (null !== $receivedStamp && null !== $receivedStamp->getLocationHeader()) {
             return $receivedStamp->getLocationHeader();
