@@ -37,7 +37,7 @@ jobs:
             -   name: Create Symfony app
                 run: |
                     composer create-project symfony/skeleton:"${{ matrix.symfony }}.*" app
-                    composer config -d ./app repositories.commonmark-bundle path ../project
+                    composer config -d ./app repositories.messenger-azure-bundle path ../project
                     composer config -d ./app minimum-stability dev
             # Cache Composer dependencies
             -   name: Get composer cache directory
@@ -53,4 +53,4 @@ jobs:
 
             # Install the bundle
             -   name: Install AymdevCommonmarkBundle
-                run: composer require -d ./app --prefer-source aymdev/commonmark-bundle:"*"
+                run: composer require -d ./app --prefer-source aymdev/messenger-azure-bundle:"*"
