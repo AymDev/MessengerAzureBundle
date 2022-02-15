@@ -162,6 +162,38 @@ final class AzureBrokerPropertiesStampTest extends TestCase
     }
 
     /**
+     * The date objects must be set to the current timezone when created from a response
+     */
+    public function testDateTimePropertiesAreSetToCurrentTimeZone(): void
+    {
+        // Expects a GMT+1
+        $sourceTime = 'Sun, 06 Nov 1994 08:49:37 GMT';
+        $expectedTime = '1994-11-06 09:49:37';
+        date_default_timezone_set('Europe/Paris');
+
+        $httpClient = new MockHttpClient([
+            new MockResponse('', [
+                'response_headers' => [
+                    'BrokerProperties' => json_encode([
+                        'LockedUntilUtc' => $sourceTime,
+                        'EnqueuedTimeUtc' => $sourceTime,
+                        'ScheduledEnqueueTimeUtc' => $sourceTime,
+                    ]),
+                ],
+            ])
+        ]);
+
+        $response = $httpClient->request('TEST', '/');
+        $stamp = AzureBrokerPropertiesStamp::createFromResponse($response);
+        self::assertInstanceOf(\DateTimeInterface::class, $stamp->getLockedUntilUtc());
+        self::assertSame($expectedTime, $stamp->getLockedUntilUtc()->format('Y-m-d H:i:s'));
+        self::assertInstanceOf(\DateTimeInterface::class, $stamp->getEnqueuedTimeUtc());
+        self::assertSame($expectedTime, $stamp->getEnqueuedTimeUtc()->format('Y-m-d H:i:s'));
+        self::assertInstanceOf(\DateTimeInterface::class, $stamp->getScheduledEnqueueTimeUtc());
+        self::assertSame($expectedTime, $stamp->getScheduledEnqueueTimeUtc()->format('Y-m-d H:i:s'));
+    }
+
+    /**
      * The encoding of the BrokerProperties must encode in JSON, remove null values and format datetimes
      */
     public function testEncodeTo(): void

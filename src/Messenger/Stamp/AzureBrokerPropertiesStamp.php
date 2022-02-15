@@ -129,28 +129,41 @@ class AzureBrokerPropertiesStamp implements StampInterface
          * } $properties
          */
         $properties = json_decode($header, true);
+        $defaultTimeZone = new \DateTimeZone(date_default_timezone_get());
+
+        $lockedUntilUtc = null;
+        if (isset($properties['LockedUntilUtc'])) {
+            $lockedUntilUtc = new \DateTimeImmutable($properties['LockedUntilUtc']);
+            $lockedUntilUtc = $lockedUntilUtc->setTimezone($defaultTimeZone);
+        }
+
+        $enqueuedTimeUtc = null;
+        if (isset($properties['EnqueuedTimeUtc'])) {
+            $enqueuedTimeUtc = new \DateTimeImmutable($properties['EnqueuedTimeUtc']);
+            $enqueuedTimeUtc = $enqueuedTimeUtc->setTimezone($defaultTimeZone);
+        }
+
+        $scheduledEnqueueTimeUtc = null;
+        if (isset($properties['ScheduledEnqueueTimeUtc'])) {
+            $scheduledEnqueueTimeUtc = new \DateTimeImmutable($properties['ScheduledEnqueueTimeUtc']);
+            $scheduledEnqueueTimeUtc = $scheduledEnqueueTimeUtc->setTimezone($defaultTimeZone);
+        }
 
         return new self(
             $properties['ContentType'] ?? null,
             $properties['CorrelationId'] ?? null,
             $properties['SessionID'] ?? null,
             $properties['DeliveryCount'] ?? null,
-            isset($properties['LockedUntilUtc'])
-                ? new \DateTimeImmutable($properties['LockedUntilUtc'])
-                : null,
+            $lockedUntilUtc,
             $properties['LockToken'] ?? null,
             $properties['MessageId'] ?? null,
             $properties['Label'] ?? null,
             $properties['ReplyTo'] ?? null,
-            isset($properties['EnqueuedTimeUtc'])
-                ? new \DateTimeImmutable($properties['EnqueuedTimeUtc'])
-                : null,
+            $enqueuedTimeUtc,
             $properties['SequenceNumber'] ?? null,
             $properties['TimeToLive'] ?? null,
             $properties['To'] ?? null,
-            isset($properties['ScheduledEnqueueTimeUtc'])
-                ? new \DateTimeImmutable($properties['ScheduledEnqueueTimeUtc'])
-                : null,
+            $scheduledEnqueueTimeUtc,
             $properties['ReplyToSessionId'] ?? null,
             $properties['PartitionKey'] ?? null
         );

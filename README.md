@@ -59,7 +59,7 @@ framework:
 
 ## Stamps
 
-This transport provides 2 stamps:
+This transport provides a few stamps:
 
 ### AzureMessageStamp
 
