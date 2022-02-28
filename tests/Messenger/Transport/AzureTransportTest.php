@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\AymDev\MessengerAzureBundle\Messenger\Transport;
 
+use AymDev\MessengerAzureBundle\Messenger\Exception\SerializerDecodingException;
 use AymDev\MessengerAzureBundle\Messenger\Stamp\AzureMessageStamp;
 use AymDev\MessengerAzureBundle\Messenger\Transport\AzureTransport;
 use AymDev\MessengerAzureBundle\Messenger\Stamp\AzureBrokerPropertiesStamp;
@@ -12,6 +13,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\Exception\MessageDecodingFailedException;
 use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\Stamp\TransportMessageIdStamp;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
@@ -84,6 +86,54 @@ final class AzureTransportTest extends TestCase
         );
 
         $transport->get();
+    }
+
+    /**
+     * Messages that can't be decoded must throw a converted exception and delete the message
+     */
+    public function testGetSerializationExceptionIsConvertedAndDeletesMessage(): void
+    {
+        self::expectException(SerializerDecodingException::class);
+        self::expectExceptionCode(1646061041);
+
+        $serializer = self::createMock(SerializerInterface::class);
+        $serializer->expects(self::once())
+            ->method('decode')
+            ->willThrowException(new MessageDecodingFailedException());
+
+        $location = 'https://test-location/deletion';
+
+        $httpReceiver = new MockHttpClient(
+            [
+                new MockResponse('test-body', [
+                        'http_code' => 201,
+                        'response_headers' => [
+                            'Location' => $location
+                        ],
+                ]),
+                function (string $method, string $url) use ($location): ResponseInterface {
+                    self::assertSame('DELETE', $method);
+                    self::assertSame($location, $url);
+
+                    return new MockResponse();
+                },
+            ]
+        );
+
+        $transport = new AzureTransport(
+            $serializer,
+            new MockHttpClient(),
+            $httpReceiver,
+            AzureTransport::RECEIVE_MODE_PEEK_LOCK,
+            'test-entity',
+            'test-subscription'
+        );
+
+        try {
+            $transport->get();
+        } finally {
+            self::assertSame(2, $httpReceiver->getRequestsCount());
+        }
     }
 
     /**

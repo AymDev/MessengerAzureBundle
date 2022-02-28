@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace AymDev\MessengerAzureBundle\Messenger\Transport;
 
+use AymDev\MessengerAzureBundle\Messenger\Exception\SerializerDecodingException;
 use AymDev\MessengerAzureBundle\Messenger\Stamp\AzureBrokerPropertiesStamp;
 use AymDev\MessengerAzureBundle\Messenger\Stamp\AzureMessageStamp;
 use AymDev\MessengerAzureBundle\Messenger\Stamp\AzureReceivedStamp;
 use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\Exception\MessageDecodingFailedException;
 use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\Stamp\TransportMessageIdStamp;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
@@ -15,6 +17,7 @@ use Symfony\Component\Messenger\Transport\TransportInterface;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
 /**
  * Messenger transport for Azure Service Bus
@@ -92,12 +95,34 @@ final class AzureTransport implements TransportInterface
         }
 
         // Decode message
-        $envelope = $this->serializer->decode([
-            'body' => $body,
-            'headers' => $headers,
-        ]);
+        try {
+            $envelope = $this->serializer->decode([
+                'body' => $body,
+                'headers' => $headers,
+            ]);
+        } catch (MessageDecodingFailedException $e) {
+            // Delete the message using an empty message
+            $envelope = $this->addStamps(new Envelope(new EmptyMessage()), $response);
+            $this->delete($envelope);
 
-        // Add stamps
+            throw new SerializerDecodingException(
+                $envelope,
+                $e->getMessage(),
+                1646061041,
+                $e
+            );
+        }
+
+        return [$this->addStamps($envelope, $response)];
+    }
+
+    /**
+     * Add stamps to an envelope
+     * @throws HttpExceptionInterface
+     * @throws TransportExceptionInterface
+     */
+    private function addStamps(Envelope $envelope, ResponseInterface $response): Envelope
+    {
         $brokerPropertiesStamp = AzureBrokerPropertiesStamp::createFromResponse($response);
         $envelope = $envelope
             ->with(AzureReceivedStamp::createFromResponse($response))
@@ -110,7 +135,7 @@ final class AzureTransport implements TransportInterface
             $envelope = $envelope->with(new TransportMessageIdStamp($brokerPropertiesStamp->getMessageId()));
         }
 
-        return [$envelope];
+        return $envelope;
     }
 
     /**

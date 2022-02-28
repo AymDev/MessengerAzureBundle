@@ -83,7 +83,16 @@ The `AymDev\MessengerAzureBundle\Messenger\Stamp\AzureReceivedStamp` stamp holds
 
 ## Serialization
 
+### Creating your serializers
 There is no serializer provided, but here is the expected array structure of an encoded envelope:
 
  - `body`: your plain text message
  - `headers`: optional HTTP headers (either received from *Azure Service Bus* response or to send to the REST API)
+
+### Logging decoding errors
+When a serializer throws a `Symfony\Component\Messenger\Exception\MessageDecodingFailedException` while decoding a message,
+it will be converted to a `AymDev\MessengerAzureBundle\Messenger\Exception\SerializerDecodingException` which contains an
+envelope with an empty message but with the same stamps as a successfully decoded message.
+
+You can then [listen](https://symfony.com/doc/current/event_dispatcher.html) to the `console.error` Symfony event and get
+the topic/queue name where then decoding failure happened, the original message, etc.
