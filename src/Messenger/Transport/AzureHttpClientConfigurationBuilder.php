@@ -12,64 +12,91 @@ final class AzureHttpClientConfigurationBuilder
 {
     /**
      * Build configuration for a sender HttpClient transport
+     *
      * @param array{
-     *     transport_name: string,
+     *     shared_access_key_name: string,
+     *     shared_access_key: string,
+     *     namespace: string,
+     * } $dsnParts
+     * @param array{
      *     entity_path: string,
-     *     subscription: string|null,
      *     token_expiry: int,
-     *     receive_mode: string
+     *     subscription: string|null,
      * } $options
-     * @return array{endpoint: string, options: mixed[]}
+     * @return array{
+     *     endpoint: string,
+     *     shared_access_key_name: string,
+     *     shared_access_key: string,
+     *     token_expiry: int,
+     *     options: array{headers: array<string, string>},
+     * }
      */
-    public function buildSenderConfiguration(string $dsn, array $options): array
+    public function buildSenderConfiguration(array $dsnParts, array $options): array
     {
-        return $this->buildConfiguration(false, $dsn, $options);
+        return $this->buildConfiguration(false, $dsnParts, $options);
     }
 
     /**
      * Build configuration for a receiver HttpClient transport
+     *
      * @param array{
-     *     transport_name: string,
+     *     shared_access_key_name: string,
+     *     shared_access_key: string,
+     *     namespace: string,
+     * } $dsnParts
+     * @param array{
      *     entity_path: string,
-     *     subscription: string|null,
      *     token_expiry: int,
-     *     receive_mode: string
+     *     subscription: string|null,
      * } $options
-     * @return array{endpoint: string, options: mixed[]}
+     * @return array{
+     *     endpoint: string,
+     *     shared_access_key_name: string,
+     *     shared_access_key: string,
+     *     token_expiry: int,
+     *     options: array{headers: array<string, string>},
+     * }
      */
-    public function buildReceiverConfiguration(string $dsn, array $options): array
+    public function buildReceiverConfiguration(array $dsnParts, array $options): array
     {
-        return $this->buildConfiguration(true, $dsn, $options);
+        return $this->buildConfiguration(true, $dsnParts, $options);
     }
 
     /**
      * @param array{
-     *     transport_name: string,
+     *     shared_access_key_name: string,
+     *     shared_access_key: string,
+     *     namespace: string,
+     * } $dsnParts
+     * @param array{
      *     entity_path: string,
-     *     subscription: string|null,
      *     token_expiry: int,
-     *     receive_mode: string
+     *     subscription: string|null,
      * } $options
-     * @return array{endpoint: string, options: mixed[]}
+     * @return array{
+     *     endpoint: string,
+     *     shared_access_key_name: string,
+     *     shared_access_key: string,
+     *     token_expiry: int,
+     *     options: array{headers: array<string, string>},
+     * }
      */
-    private function buildConfiguration(bool $isReceiver, string $dsn, array $options): array
+    private function buildConfiguration(bool $isReceiver, array $dsnParts, array $options): array
     {
-        [$sharedAccessKeyName, $sharedAccessKey, $namespace] = $this->parseDsn($dsn, $options['transport_name']);
-        $endpoint = $this->getBaseEndpoint($isReceiver, $namespace, $options['entity_path'], $options['subscription']);
-
-        $sasToken = $this->generateSharedAccessSignatureToken(
-            $endpoint,
-            $sharedAccessKeyName,
-            $sharedAccessKey,
-            $options['token_expiry']
+        $endpoint = $this->getBaseEndpoint(
+            $isReceiver,
+            $dsnParts['namespace'],
+            $options['entity_path'],
+            $options['subscription']
         );
 
         $clientOptions = [
             'endpoint' => $endpoint,
+            'shared_access_key_name' => $dsnParts['shared_access_key_name'],
+            'shared_access_key' => $dsnParts['shared_access_key'],
+            'token_expiry' => $options['token_expiry'],
             'options' => [
-                'headers' => [
-                    'Authorization' => $sasToken,
-                ],
+                'headers' => [],
             ]
         ];
 
@@ -78,22 +105,6 @@ final class AzureHttpClientConfigurationBuilder
         }
 
         return $clientOptions;
-    }
-
-    /**
-     * Parse the DSN to extract the namespace and shared access key
-     * @return string[]
-     */
-    private function parseDsn(string $dsn, string $transportName): array
-    {
-        if (1 !== preg_match('~^azure://(.+):(.+)@(.+)$~', $dsn, $matches)) {
-            $message = sprintf('Invalid Azure Service Bus DSN for the "%s" transport. ', $transportName);
-            $message .= 'It must be in the following format: azure://SharedAccessKeyName:SharedAccessKey@namespace';
-            throw new \InvalidArgumentException($message, 1643988474);
-        }
-
-        array_shift($matches);
-        return $matches;
     }
 
     /**
@@ -116,33 +127,5 @@ final class AzureHttpClientConfigurationBuilder
         }
 
         return sprintf('https://%s.servicebus.windows.net/%s/', $namespace, $entityPath);
-    }
-
-    /**
-     * Generate the SAS token used to authenticate on Azure Service Bus REST API.
-     */
-    private function generateSharedAccessSignatureToken(
-        string $endpoint,
-        string $accessKeyName,
-        string $accessKey,
-        int $tokenExpiry
-    ): string {
-        // Token expiry instant
-        $expiry = time() + $tokenExpiry;
-
-        // URL-encoded URI of the resource being accessed
-        $resource = strtolower(rawurlencode(strtolower($endpoint)));
-
-        // URL-encoded HMAC SHA256 signature
-        $toSign = $resource . "\n" . $expiry;
-        $signature = rawurlencode(base64_encode(hash_hmac('sha256', $toSign, $accessKey, true)));
-
-        return sprintf(
-            'SharedAccessSignature sig=%s&se=%d&skn=%s&sr=%s',
-            $signature,
-            $expiry,
-            $accessKeyName,
-            $resource
-        );
     }
 }

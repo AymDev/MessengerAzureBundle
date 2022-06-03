@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AymDev\MessengerAzureBundle\Messenger\Transport;
 
-use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Component\Messenger\Transport\TransportFactoryInterface;
 use Symfony\Component\Messenger\Transport\TransportInterface;
@@ -26,12 +25,23 @@ final class AzureTransportFactory implements TransportFactoryInterface
         'receive_mode' => AzureTransport::RECEIVE_MODE_PEEK_LOCK,
     ];
 
+    /** @var DsnParser */
+    private $dsnParser;
+
     /** @var AzureHttpClientConfigurationBuilder */
     private $httpClientConfigurationBuilder;
 
-    public function __construct(AzureHttpClientConfigurationBuilder $httpClientConfigurationBuilder)
-    {
+    /** @var AzureHttpClientFactory */
+    private $httpClientFactory;
+
+    public function __construct(
+        DsnParser $dsnParser,
+        AzureHttpClientConfigurationBuilder $httpClientConfigurationBuilder,
+        AzureHttpClientFactory $httpClientFactory
+    ) {
+        $this->dsnParser = $dsnParser;
         $this->httpClientConfigurationBuilder = $httpClientConfigurationBuilder;
+        $this->httpClientFactory = $httpClientFactory;
     }
 
     /**
@@ -48,23 +58,15 @@ final class AzureTransportFactory implements TransportFactoryInterface
     public function createTransport(string $dsn, array $options, SerializerInterface $serializer): TransportInterface
     {
         $options = $this->validateOptions($options);
+        $dsnParts = $this->dsnParser->parseDsn($dsn, $options['transport_name']);
 
-        $senderConfiguration = $this->httpClientConfigurationBuilder->buildSenderConfiguration($dsn, $options);
-        $senderClient = HttpClient::createForBaseUri(
-            $senderConfiguration['endpoint'],
-            $senderConfiguration['options']
-        );
-
-        $receiverConfiguration = $this->httpClientConfigurationBuilder->buildReceiverConfiguration($dsn, $options);
-        $receiverClient = HttpClient::createForBaseUri(
-            $receiverConfiguration['endpoint'],
-            $receiverConfiguration['options']
-        );
+        $senderConfiguration = $this->httpClientConfigurationBuilder->buildSenderConfiguration($dsnParts, $options);
+        $receiverConfiguration = $this->httpClientConfigurationBuilder->buildReceiverConfiguration($dsnParts, $options);
 
         return new AzureTransport(
             $serializer,
-            $senderClient,
-            $receiverClient,
+            $this->httpClientFactory->createClient($senderConfiguration),
+            $this->httpClientFactory->createClient($receiverConfiguration),
             $options['receive_mode'],
             $options['entity_path'],
             $options['subscription']

@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Tests\AymDev\MessengerAzureBundle\Messenger\Transport;
 
 use AymDev\MessengerAzureBundle\Messenger\Transport\AzureHttpClientConfigurationBuilder;
+use AymDev\MessengerAzureBundle\Messenger\Transport\AzureHttpClientFactory;
 use AymDev\MessengerAzureBundle\Messenger\Transport\AzureTransport;
 use AymDev\MessengerAzureBundle\Messenger\Transport\AzureTransportFactory;
+use AymDev\MessengerAzureBundle\Messenger\Transport\DsnParser;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 
@@ -17,7 +19,11 @@ final class AzureTransportFactoryTest extends TestCase
      */
     public function testSupportsAzureDsn(): void
     {
-        $factory = new AzureTransportFactory(new AzureHttpClientConfigurationBuilder());
+        $factory = new AzureTransportFactory(
+            new DsnParser(),
+            new AzureHttpClientConfigurationBuilder(),
+            new AzureHttpClientFactory()
+        );
 
         self::assertTrue($factory->supports('azure://KeyName:Key@namespace', []));
         self::assertTrue($factory->supports('azure://', []));
@@ -32,7 +38,11 @@ final class AzureTransportFactoryTest extends TestCase
         self::expectException(\InvalidArgumentException::class);
         self::expectExceptionCode(1643989596);
 
-        $factory = new AzureTransportFactory(new AzureHttpClientConfigurationBuilder());
+        $factory = new AzureTransportFactory(
+            new DsnParser(),
+            new AzureHttpClientConfigurationBuilder(),
+            new AzureHttpClientFactory()
+        );
 
         $factory->createTransport(
             'azure://KeyName:Key@namespace',
@@ -51,7 +61,11 @@ final class AzureTransportFactoryTest extends TestCase
         self::expectException(\InvalidArgumentException::class);
         self::expectExceptionCode(1643994036);
 
-        $factory = new AzureTransportFactory(new AzureHttpClientConfigurationBuilder());
+        $factory = new AzureTransportFactory(
+            new DsnParser(),
+            new AzureHttpClientConfigurationBuilder(),
+            new AzureHttpClientFactory()
+        );
 
         $factory->createTransport(
             'azure://KeyName:Key@namespace',
@@ -69,7 +83,11 @@ final class AzureTransportFactoryTest extends TestCase
      */
     public function testCreateTransport(): void
     {
-        $factory = new AzureTransportFactory(new AzureHttpClientConfigurationBuilder());
+        $factory = new AzureTransportFactory(
+            new DsnParser(),
+            new AzureHttpClientConfigurationBuilder(),
+            new AzureHttpClientFactory()
+        );
 
         $transport = $factory->createTransport(
             'azure://KeyName:Key@namespace',
