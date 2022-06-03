@@ -17,22 +17,22 @@ final class AzureHttpClientConfigurationBuilderTest extends TestCase
     public function testDefaultConfiguration(bool $isSender, array $configuration): void
     {
         self::assertArrayHasKey('endpoint', $configuration);
+        self::assertArrayHasKey('shared_access_key_name', $configuration);
+        self::assertArrayHasKey('shared_access_key', $configuration);
+        self::assertArrayHasKey('token_expiry', $configuration);
         self::assertArrayHasKey('options', $configuration);
 
         // It MUST end with a trailing slash
         self::assertStringEndsWith('/', $configuration['endpoint']);
         self::assertSame('https://namespace.servicebus.windows.net/entity/', $configuration['endpoint']);
 
+        self::assertSame('KeyName', $configuration['shared_access_key_name']);
+        self::assertSame('Key', $configuration['shared_access_key']);
+        self::assertSame(3600, $configuration['token_expiry']);
+
         if ($isSender) {
             self::assertArrayHasKey('Content-Type', $configuration['options']['headers']);
         }
-
-        self::assertArrayHasKey('headers', $configuration['options']);
-        self::assertArrayHasKey('Authorization', $configuration['options']['headers']);
-        self::assertStringStartsWith(
-            'SharedAccessSignature ',
-            $configuration['options']['headers']['Authorization']
-        );
     }
 
     /**
@@ -40,20 +40,22 @@ final class AzureHttpClientConfigurationBuilderTest extends TestCase
      */
     public function provideClientConfiguration(): array
     {
-        $dsn = 'azure://KeyName:Key@namespace';
+        $dsnParts = [
+            'shared_access_key_name' => 'KeyName',
+            'shared_access_key' => 'Key',
+            'namespace' => 'namespace',
+        ];
         $options = [
-            'transport_name' => 'test-transport',
             'entity_path' => 'entity',
             'subscription' => null,
             'token_expiry' => 3600,
-            'receive_mode' => 'peek-lock',
         ];
 
         $factory = new AzureHttpClientConfigurationBuilder();
 
         return [
-            [true, $factory->buildSenderConfiguration($dsn, $options)],
-            [false, $factory->buildReceiverConfiguration($dsn, $options)],
+            [true, $factory->buildSenderConfiguration($dsnParts, $options)],
+            [false, $factory->buildReceiverConfiguration($dsnParts, $options)],
         ];
     }
 
@@ -63,12 +65,14 @@ final class AzureHttpClientConfigurationBuilderTest extends TestCase
     public function testTopicReceiverConfiguration(): void
     {
         $factory = new AzureHttpClientConfigurationBuilder();
-        $configuration = $factory->buildReceiverConfiguration('azure://KeyName:Key@namespace', [
-            'transport_name' => 'test-transport',
+        $configuration = $factory->buildReceiverConfiguration([
+            'shared_access_key_name' => 'KeyName',
+            'shared_access_key' => 'Key',
+            'namespace' => 'namespace',
+        ], [
             'entity_path' => 'entity',
             'subscription' => 'subscription',
             'token_expiry' => 3600,
-            'receive_mode' => 'peek-lock',
         ]);
 
         // It MUST end with a trailing slash
@@ -76,23 +80,5 @@ final class AzureHttpClientConfigurationBuilderTest extends TestCase
             'https://namespace.servicebus.windows.net/entity/subscriptions/subscription/',
             $configuration['endpoint']
         );
-    }
-
-    /**
-     * The DSN must respect a specific format
-     */
-    public function testThrowsOnInvalidDsn(): void
-    {
-        self::expectException(\InvalidArgumentException::class);
-        self::expectExceptionCode(1643988474);
-
-        $factory = new AzureHttpClientConfigurationBuilder();
-        $factory->buildSenderConfiguration('azure://invalid-dsn', [
-            'transport_name' => 'test-transport',
-            'entity_path' => 'entity',
-            'token_expiry' => 3600,
-            'receive_mode' => 'peek-lock',
-            'subscription' => null,
-        ]);
     }
 }
