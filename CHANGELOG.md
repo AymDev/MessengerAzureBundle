@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2022-06-18
+### Changed
+ - Generate SAS tokens per request to avoid authentication failures: [PR #1](https://github.com/AymDev/MessengerAzureBundle/pull/1)
+
 ## [1.2.0] - 2022-02-28
 ### Added
  - Converts the `MessageDecodingFailedException` to a new `SerializerDecodingException` containing an envelope with an empty message for logging purposes.
@@ -28,7 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - **Symfony Messenger** transport for **Azure Service Bus** *queues* and *topics*
 
-[Unreleased]: https://github.com/AymDev/MessengerAzureBundle/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/AymDev/MessengerAzureBundle/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/AymDev/MessengerAzureBundle/releases/tag/v1.3.0
 [1.2.0]: https://github.com/AymDev/MessengerAzureBundle/releases/tag/v1.2.0
 [1.1.1]: https://github.com/AymDev/MessengerAzureBundle/releases/tag/v1.1.1
 [1.1.0]: https://github.com/AymDev/MessengerAzureBundle/releases/tag/v1.1.0
