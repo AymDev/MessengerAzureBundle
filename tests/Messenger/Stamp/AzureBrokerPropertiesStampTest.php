@@ -24,7 +24,7 @@ final class AzureBrokerPropertiesStampTest extends TestCase
 
         self::assertNull($stamp->getContentType());
         self::assertNull($stamp->getCorrelationId());
-        self::assertNull($stamp->getSessionID());
+        self::assertNull($stamp->getSessionId());
         self::assertNull($stamp->getDeliveryCount());
         self::assertNull($stamp->getLockedUntilUtc());
         self::assertNull($stamp->getLockToken());
@@ -62,7 +62,7 @@ final class AzureBrokerPropertiesStampTest extends TestCase
                         'BrokerProperties' => json_encode([
                             'ContentType' => null,
                             'CorrelationId' => null,
-                            'SessionID' => null,
+                            'SessionId' => null,
                             'DeliveryCount' => null,
                             'LockedUntilUtc' => null,
                             'LockToken' => null,
@@ -90,7 +90,7 @@ final class AzureBrokerPropertiesStampTest extends TestCase
     {
         $contentType = 'test-content-type';
         $correlationId = 'test-correlation-id';
-        $sessionID = 'test-session-id';
+        $sessionId = 'test-session-id';
         $deliveryCount = 1;
         $lockedUntilUtc = '1970-01-01 00:00:00';
         $lockToken = 'test-lock-token';
@@ -111,7 +111,7 @@ final class AzureBrokerPropertiesStampTest extends TestCase
                     'BrokerProperties' => json_encode([
                         'ContentType' => $contentType,
                         'CorrelationId' => $correlationId,
-                        'SessionID' => $sessionID,
+                        'SessionId' => $sessionId,
                         'DeliveryCount' => $deliveryCount,
                         'LockedUntilUtc' => $lockedUntilUtc,
                         'LockToken' => $lockToken,
@@ -136,7 +136,7 @@ final class AzureBrokerPropertiesStampTest extends TestCase
 
         self::assertSame($contentType, $stamp->getContentType());
         self::assertSame($correlationId, $stamp->getCorrelationId());
-        self::assertSame($sessionID, $stamp->getSessionID());
+        self::assertSame($sessionId, $stamp->getSessionId());
         self::assertSame($deliveryCount, $stamp->getDeliveryCount());
 
         self::assertInstanceOf(\DateTimeInterface::class, $stamp->getLockedUntilUtc());

@@ -21,7 +21,7 @@ class AzureBrokerPropertiesStamp implements StampInterface
     private $correlationId;
 
     /** @var string|null */
-    private $sessionID;
+    private $sessionId;
 
     /** @var int|null */
     private $deliveryCount;
@@ -65,7 +65,7 @@ class AzureBrokerPropertiesStamp implements StampInterface
     public function __construct(
         ?string $contentType = null,
         ?string $correlationId = null,
-        ?string $sessionID = null,
+        ?string $sessionId = null,
         ?int $deliveryCount = null,
         ?\DateTimeInterface $lockedUntilUtc = null,
         ?string $lockToken = null,
@@ -82,7 +82,7 @@ class AzureBrokerPropertiesStamp implements StampInterface
     ) {
         $this->contentType = $contentType;
         $this->correlationId = $correlationId;
-        $this->sessionID = $sessionID;
+        $this->sessionId = $sessionId;
         $this->deliveryCount = $deliveryCount;
         $this->lockedUntilUtc = $lockedUntilUtc;
         $this->lockToken = $lockToken;
@@ -112,7 +112,7 @@ class AzureBrokerPropertiesStamp implements StampInterface
          * @var null|array{
          *     ContentType?: string,
          *     CorrelationId?: string,
-         *     SessionID?: string,
+         *     SessionId?: string,
          *     DeliveryCount?: int,
          *     LockedUntilUtc?: string,
          *     LockToken?: string,
@@ -152,7 +152,7 @@ class AzureBrokerPropertiesStamp implements StampInterface
         return new self(
             $properties['ContentType'] ?? null,
             $properties['CorrelationId'] ?? null,
-            $properties['SessionID'] ?? null,
+            $properties['SessionId'] ?? null,
             $properties['DeliveryCount'] ?? null,
             $lockedUntilUtc,
             $properties['LockToken'] ?? null,
@@ -179,7 +179,7 @@ class AzureBrokerPropertiesStamp implements StampInterface
         $properties = [
             'ContentType' => $this->contentType,
             'CorrelationId' => $this->correlationId,
-            'SessionID' => $this->sessionID,
+            'SessionId' => $this->sessionId,
             'DeliveryCount' => $this->deliveryCount,
             'LockedUntilUtc' => $this->lockedUntilUtc !== null
                 ? $this->lockedUntilUtc->format('Y-m-d H:i:s')
@@ -230,14 +230,14 @@ class AzureBrokerPropertiesStamp implements StampInterface
         return $this;
     }
 
-    public function getSessionID(): ?string
+    public function getSessionId(): ?string
     {
-        return $this->sessionID;
+        return $this->sessionId;
     }
 
-    public function setSessionID(?string $sessionID): self
+    public function setSessionId(?string $sessionId): self
     {
-        $this->sessionID = $sessionID;
+        $this->sessionId = $sessionId;
         return $this;
     }
 
