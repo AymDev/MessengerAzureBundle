@@ -45,9 +45,11 @@ jobs:
             # Install symfony app
             -   name: Create Symfony app
                 run: |
-                    composer create-project symfony/skeleton:"${{ matrix.symfony }}.*" app
+                    composer create-project --no-install symfony/skeleton:"${{ matrix.symfony }}.*" app
                     composer config -d ./app repositories.messenger-azure-bundle path ../project
                     composer config -d ./app minimum-stability dev
+                    composer config -d ./app --no-interaction allow-plugins.symfony/flex true
+                    composer install -d ./app
             # Cache Composer dependencies
             -   name: Get composer cache directory
                 id: composer-cache
