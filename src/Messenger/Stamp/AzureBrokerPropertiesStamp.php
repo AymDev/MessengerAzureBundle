@@ -107,7 +107,15 @@ class AzureBrokerPropertiesStamp implements StampInterface
     public static function createFromResponse(ResponseInterface $response): self
     {
         $header = $response->getHeaders()['brokerproperties'][0] ?? '';
+        return AzureBrokerPropertiesStamp::createFromJson($header);
+    }
 
+    /**
+     * Create a stamp from a json string
+     * @throws \Exception
+     */
+    public static function createFromJson(string $json): self
+    {
         /**
          * @var null|array{
          *     ContentType?: string,
@@ -128,7 +136,7 @@ class AzureBrokerPropertiesStamp implements StampInterface
          *     PartitionKey?: string
          * } $properties
          */
-        $properties = json_decode($header, true);
+        $properties = json_decode($json, true);
         $defaultTimeZone = new \DateTimeZone(date_default_timezone_get());
 
         $lockedUntilUtc = null;
