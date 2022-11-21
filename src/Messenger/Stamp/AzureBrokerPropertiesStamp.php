@@ -107,7 +107,7 @@ class AzureBrokerPropertiesStamp implements StampInterface
     public static function createFromResponse(ResponseInterface $response): self
     {
         $header = $response->getHeaders()['brokerproperties'][0] ?? '';
-        return AzureBrokerPropertiesStamp::createFromJson($header);
+        return self::createFromJson($header);
     }
 
     /**
