@@ -11,6 +11,7 @@ use AymDev\MessengerAzureBundle\Messenger\Stamp\AzureReceivedStamp;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\MessageDecodingFailedException;
 use Symfony\Component\Messenger\Exception\TransportException;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Messenger\Stamp\TransportMessageIdStamp;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Component\Messenger\Transport\TransportInterface;
@@ -161,6 +162,14 @@ final class AzureTransport implements TransportInterface
         // Build broker properties
         /** @var null|AzureBrokerPropertiesStamp $brokerProperties */
         $brokerProperties = $envelope->last(AzureBrokerPropertiesStamp::class);
+
+        /** @var null|DelayStamp $delayStamp */
+        $delayStamp =  $envelope->last(DelayStamp::class);
+        if ($delayStamp) {
+            $now = new \DateTime('UTC');
+            $brokerProperties->setScheduledEnqueueTimeUtc((clone $now)->modify(sprintf('+%d seconds', $delayStamp->getDelay()/1000)));
+        }
+
         if (null !== $brokerProperties) {
             try {
                 $additionalHeaders['BrokerProperties'] = $brokerProperties->encode();

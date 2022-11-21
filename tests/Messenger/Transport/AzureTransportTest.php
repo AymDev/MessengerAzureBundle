@@ -15,6 +15,7 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\MessageDecodingFailedException;
 use Symfony\Component\Messenger\Exception\TransportException;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Messenger\Stamp\TransportMessageIdStamp;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -538,6 +539,44 @@ final class AzureTransportTest extends TestCase
             self::assertArrayHasKey('normalized_headers', $options);
             self::assertArrayHasKey('brokerproperties', $options['normalized_headers']);
             self::assertSame('BrokerProperties: {}', $options['normalized_headers']['brokerproperties'][0]);
+
+            return new MockResponse();
+        });
+
+        $transport = new AzureTransport(
+            $serializer,
+            $sender,
+            new MockHttpClient(),
+            AzureTransport::RECEIVE_MODE_RECEIVE_AND_DELETE,
+            'entity'
+        );
+
+        $transport->send($envelope);
+    }
+
+    /**
+     * The BrokerProperties stamp must be used to generate a BrokerProperties HTTP header
+     */
+    public function testSendWithBrokerPropertiesStampAndDelayStamp(): void
+    {
+        $envelope = new Envelope(new class {}, [
+            new AzureBrokerPropertiesStamp(), new DelayStamp(50000)
+        ]);
+
+        $serializer = self::createMock(SerializerInterface::class);
+        $serializer->expects(self::once())
+            ->method('encode')
+            ->with($envelope)
+            ->willReturn(['body' => 'test-body']);
+
+        $sender = new MockHttpClient(function (string $method, string $url, array $options): ResponseInterface {
+            self::assertArrayHasKey('normalized_headers', $options);
+            self::assertArrayHasKey('brokerproperties', $options['normalized_headers']);
+            self::assertSame('BrokerProperties: {}', $options['normalized_headers']['brokerproperties'][0]);
+            $jsonResponse = json_decode($options['normalized_headers']['brokerproperties'][0], true);             
+            self::assertArrayHasKey('BrokerProperties', $jsonResponse);
+            self::assertArrayHasKey('ScheduledEnqueueTimeUtc', $jsonResponse['BrokerProperties']);
+            self::assertSame(1, count($jsonResponse['BrokerProperties']));
 
             return new MockResponse();
         });
