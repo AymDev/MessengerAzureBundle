@@ -560,7 +560,7 @@ final class AzureTransportTest extends TestCase
     public function testSendWithBrokerPropertiesStampAndDelayStamp(): void
     {
         $envelope = new Envelope(new class {}, [
-            new AzureBrokerPropertiesStamp(), new DelayStamp(50000)
+            new DelayStamp(50000)
         ]);
 
         $serializer = self::createMock(SerializerInterface::class);
@@ -572,8 +572,7 @@ final class AzureTransportTest extends TestCase
         $sender = new MockHttpClient(function (string $method, string $url, array $options): ResponseInterface {
             self::assertArrayHasKey('normalized_headers', $options);
             self::assertArrayHasKey('brokerproperties', $options['normalized_headers']);
-            self::assertSame('BrokerProperties: {}', $options['normalized_headers']['brokerproperties'][0]);
-            $jsonResponse = json_decode($options['normalized_headers']['brokerproperties'][0], true);             
+            $jsonResponse = json_decode($options['normalized_headers']['brokerproperties'][0], true);
             self::assertArrayHasKey('BrokerProperties', $jsonResponse);
             self::assertArrayHasKey('ScheduledEnqueueTimeUtc', $jsonResponse['BrokerProperties']);
             self::assertSame(1, count($jsonResponse['BrokerProperties']));

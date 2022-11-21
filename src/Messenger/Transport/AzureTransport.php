@@ -166,8 +166,12 @@ final class AzureTransport implements TransportInterface
         /** @var null|DelayStamp $delayStamp */
         $delayStamp =  $envelope->last(DelayStamp::class);
         if ($delayStamp) {
+            if (!$brokerProperties) {
+                $brokerProperties = new AzureBrokerPropertiesStamp();
+            }
             $now = new \DateTime('UTC');
-            $brokerProperties->setScheduledEnqueueTimeUtc((clone $now)->modify(sprintf('+%d seconds', $delayStamp->getDelay()/1000)));
+            $scheduledTime = $now->modify(sprintf('+%d seconds', $delayStamp->getDelay() / 1000));
+            $brokerProperties->setScheduledEnqueueTimeUtc($scheduledTime);
         }
 
         if (null !== $brokerProperties) {
