@@ -574,8 +574,8 @@ final class AzureTransportTest extends TestCase
             self::assertArrayHasKey('brokerproperties', $options['normalized_headers']);
             $now = new \DateTime('UTC');
             $today = $now->format('Y-m-d');
-            $regexp = '/BrokerProperties: {"ScheduledEnqueueTimeUtc":"'.$today.' \d\d:\d\d:\d\d"}/';
-            $this->assertMatchesRegularExpression($regexp, $options['normalized_headers']['brokerproperties'][0]);
+            $regexp = '/BrokerProperties: {"ScheduledEnqueueTimeUtc":"' . $today . ' \d\d:\d\d:\d\d"}/';
+            self::assertMatchesRegularExpression($regexp, $options['normalized_headers']['brokerproperties'][0]);
 
             return new MockResponse();
         });
