@@ -165,8 +165,8 @@ final class AzureTransport implements TransportInterface
 
         /** @var null|DelayStamp $delayStamp */
         $delayStamp =  $envelope->last(DelayStamp::class);
-        if ($delayStamp) {
-            if (!$brokerProperties) {
+        if (null !== $delayStamp) {
+            if (null === $brokerProperties) {
                 $brokerProperties = new AzureBrokerPropertiesStamp();
             }
             $now = new \DateTime('UTC');
