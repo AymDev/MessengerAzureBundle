@@ -572,10 +572,10 @@ final class AzureTransportTest extends TestCase
         $sender = new MockHttpClient(function (string $method, string $url, array $options): ResponseInterface {
             self::assertArrayHasKey('normalized_headers', $options);
             self::assertArrayHasKey('brokerproperties', $options['normalized_headers']);
-            $jsonResponse = json_decode($options['normalized_headers']['brokerproperties'][0], true);
-            self::assertArrayHasKey('BrokerProperties', $jsonResponse);
-            self::assertArrayHasKey('ScheduledEnqueueTimeUtc', $jsonResponse['BrokerProperties']);
-            self::assertSame(1, count($jsonResponse['BrokerProperties']));
+            $now = new \DateTime('UTC');
+            $today = $now->format('Y-m-d');
+            $regexp = '/BrokerProperties: {"ScheduledEnqueueTimeUtc":"'.$today.' \d\d:\d\d:\d\d"}/';
+            $this->assertMatchesRegularExpression($regexp, $options['normalized_headers']['brokerproperties'][0]);
 
             return new MockResponse();
         });
