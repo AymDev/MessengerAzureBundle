@@ -17,11 +17,10 @@ final class AzureHttpClientConfigurationBuilder
      *     shared_access_key_name: string,
      *     shared_access_key: string,
      *     namespace: string,
-     * } $dsnParts
-     * @param array{
      *     entity_path: string,
-     *     token_expiry: int,
      *     subscription: string|null,
+     *     token_expiry: int,
+     *     receive_mode: AzureTransport::RECEIVE_MODE_*,
      * } $options
      * @return array{
      *     endpoint: string,
@@ -31,9 +30,9 @@ final class AzureHttpClientConfigurationBuilder
      *     options: array{headers: array<string, string>},
      * }
      */
-    public function buildSenderConfiguration(array $dsnParts, array $options): array
+    public function buildSenderConfiguration(array $options): array
     {
-        return $this->buildConfiguration(false, $dsnParts, $options);
+        return $this->buildConfiguration(false, $options);
     }
 
     /**
@@ -43,11 +42,10 @@ final class AzureHttpClientConfigurationBuilder
      *     shared_access_key_name: string,
      *     shared_access_key: string,
      *     namespace: string,
-     * } $dsnParts
-     * @param array{
      *     entity_path: string,
-     *     token_expiry: int,
      *     subscription: string|null,
+     *     token_expiry: int,
+     *     receive_mode: AzureTransport::RECEIVE_MODE_*,
      * } $options
      * @return array{
      *     endpoint: string,
@@ -57,9 +55,9 @@ final class AzureHttpClientConfigurationBuilder
      *     options: array{headers: array<string, string>},
      * }
      */
-    public function buildReceiverConfiguration(array $dsnParts, array $options): array
+    public function buildReceiverConfiguration(array $options): array
     {
-        return $this->buildConfiguration(true, $dsnParts, $options);
+        return $this->buildConfiguration(true, $options);
     }
 
     /**
@@ -67,11 +65,10 @@ final class AzureHttpClientConfigurationBuilder
      *     shared_access_key_name: string,
      *     shared_access_key: string,
      *     namespace: string,
-     * } $dsnParts
-     * @param array{
      *     entity_path: string,
-     *     token_expiry: int,
      *     subscription: string|null,
+     *     token_expiry: int,
+     *     receive_mode: AzureTransport::RECEIVE_MODE_*,
      * } $options
      * @return array{
      *     endpoint: string,
@@ -81,19 +78,19 @@ final class AzureHttpClientConfigurationBuilder
      *     options: array{headers: array<string, string>},
      * }
      */
-    private function buildConfiguration(bool $isReceiver, array $dsnParts, array $options): array
+    private function buildConfiguration(bool $isReceiver, array $options): array
     {
         $endpoint = $this->getBaseEndpoint(
             $isReceiver,
-            $dsnParts['namespace'],
+            $options['namespace'],
             $options['entity_path'],
             $options['subscription']
         );
 
         $clientOptions = [
             'endpoint' => $endpoint,
-            'shared_access_key_name' => $dsnParts['shared_access_key_name'],
-            'shared_access_key' => $dsnParts['shared_access_key'],
+            'shared_access_key_name' => $options['shared_access_key_name'],
+            'shared_access_key' => $options['shared_access_key'],
             'token_expiry' => $options['token_expiry'],
             'options' => [
                 'headers' => [],
