@@ -64,12 +64,12 @@ class DsnParserTest extends TestCase
                 'token_expiry' => 1600,
             ],
             'expected' => [
-                'entity_path' => 'entity-path',
-                'token_expiry' => 7200,
                 'shared_access_key_name' => 'key-name',
                 'shared_access_key' => 'key-value',
                 'namespace' => 'namespace-name',
+                'entity_path' => 'entity-path',
                 'subscription' => null,
+                'token_expiry' => 7200,
                 'receive_mode' => 'peek-lock',
             ],
         ];
@@ -84,8 +84,8 @@ class DsnParserTest extends TestCase
             'expected' => [
                 'shared_access_key_name' => 'key-name',
                 'shared_access_key' => 'key-value',
-                'entity_path' => 'entity-path',
                 'namespace' => 'namespace-name',
+                'entity_path' => 'entity-path',
                 'subscription' => null,
                 'token_expiry' => 3600,
                 'receive_mode' => 'peek-lock',
@@ -173,6 +173,24 @@ class DsnParserTest extends TestCase
             'error' => 'Invalid "foo" receive_mode for the "my-transport" transport. It must be one of: ' .
                 'peek-lock, receive-and-delete.',
             'code' => 1643994036,
+        ];
+
+        yield 'missing shared_access_key_name' => [
+            'dsn' => 'azure://:SharedAccessKey@namespace?receive_mode=peek-lock',
+            'options' => [
+                'entity_path' => 'foo',
+            ],
+            'error' => 'Missing shared_access_key_name for the "my-transport" transport.',
+            'code' => 1702724695,
+        ];
+
+        yield 'missing shared_access_key' => [
+            'dsn' => 'azure://SharedAccessKeyName@namespace?receive_mode=peek-lock',
+            'options' => [
+                'entity_path' => 'foo',
+            ],
+            'error' => 'Missing shared_access_key for the "my-transport" transport.',
+            'code' => 1702724695,
         ];
     }
 
