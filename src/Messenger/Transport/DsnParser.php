@@ -72,21 +72,6 @@ class DsnParser
         }
 
         $options = $query + $options + self::DEFAULT_OPTIONS;
-        /** @var array{
-         *      shared_access_key_name: string|null,
-         *      shared_access_key: string|null,
-         *      namespace: string|null,
-         *      entity_path: string|null,
-         *      subscription: string|null,
-         *      token_expiry: int|string,
-         *      receive_mode: AzureTransport::RECEIVE_MODE_*,
-         * } $options
-         */
-
-        $options['shared_access_key_name'] = $this->pickOption('shared_access_key_name', 'user', $parsedUrl, $options);
-        $options['shared_access_key'] = $this->pickOption('shared_access_key', 'pass', $parsedUrl, $options);
-        $options['namespace'] = $this->pickOption('namespace', 'host', $parsedUrl, $options);
-        $options['token_expiry'] = (int) $options['token_expiry'];
 
         // Missing topic or queue name
         if (null === $options['entity_path']) {
@@ -109,17 +94,28 @@ class DsnParser
             );
         }
 
-        // @phpstan-ignore-next-line after all those array merges PHPstan gets confused about the result shape
-        return $options;
+        return [
+            'shared_access_key_name' =>  $this->pickOption('shared_access_key_name', 'user', $parsedUrl, $options, $transportName),
+            'shared_access_key' =>  $this->pickOption('shared_access_key', 'pass', $parsedUrl, $options, $transportName),
+            'namespace' =>  $this->pickOption('namespace', 'host', $parsedUrl, $options, $transportName),
+            'entity_path' =>  $options['entity_path'],
+            'subscription' =>  $options['subscription'],
+            'token_expiry' =>  (int) $options['token_expiry'],
+            'receive_mode' =>  $options['receive_mode'],
+        ];
     }
 
     /**
      * @param array<string, int|string> $dsnParts
-     * @param array<string, mixed> $options
-     * @return mixed
+     * @param array<string, string|null> $options
      */
-    private function pickOption(string $optionName, string $dsnName, array $dsnParts, array $options)
-    {
+    private function pickOption(
+        string $optionName,
+        string $dsnName,
+        array $dsnParts,
+        array $options,
+        string $transportName
+    ): string {
         $dsnValue = $dsnParts[$dsnName] ?? '';
         if ($dsnValue !== '') {
             return urldecode((string) $dsnValue);
@@ -129,6 +125,9 @@ class DsnParser
             return $options[$optionName];
         }
 
-        return self::DEFAULT_OPTIONS[$optionName];
+        throw new InvalidArgumentException(
+            sprintf('Missing %s for the "%s" transport.', $optionName, $transportName),
+            1702724695
+        );
     }
 }
