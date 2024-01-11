@@ -73,20 +73,44 @@ class DsnParser
 
         $options = $query + $options + self::DEFAULT_OPTIONS;
 
-        // Missing topic or queue name
-        if (null === $options['entity_path']) {
+        if (!is_string($options['entity_path'])) {
             throw new InvalidArgumentException(
-                sprintf('Missing entity_path (queue or topic) for the "%s" transport.', $transportName),
+                sprintf(
+                    'Invalid "entity_path" (queue or topic) for the "%s" transport. Expected string, got %s',
+                    $transportName,
+                    get_debug_type($options['entity_path']),
+                ),
                 1643989596
             );
         }
 
-        // Invalid receive mode
+        if (!is_string($options['subscription']) && null !== $options['subscription']) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Invalid "subscription" for the "%s" transport. Expected string, got %s',
+                    $transportName,
+                    get_debug_type($options['subscription']),
+                ),
+                1643989596
+            );
+        }
+
+        if (!is_int($options['token_expiry']) && !ctype_digit($options['token_expiry'])) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Invalid "token_expiry" for the "%s" transport. Expected integer, got %s',
+                    $transportName,
+                    get_debug_type($options['token_expiry']),
+                ),
+                1643989596
+            );
+        }
+
         if (false === in_array($options['receive_mode'], self::RECEIVE_MODES, true)) {
             throw new InvalidArgumentException(
                 sprintf(
                     'Invalid "%s" receive_mode for the "%s" transport. It must be one of: %s.',
-                    $options['receive_mode'],
+                    is_scalar($options['receive_mode']) ? $options['receive_mode'] : get_debug_type($options['receive_mode']),
                     $transportName,
                     implode(', ', self::RECEIVE_MODES)
                 ),
@@ -107,7 +131,7 @@ class DsnParser
 
     /**
      * @param array<string, int|string> $dsnParts
-     * @param array<string, string|null> $options
+     * @param mixed[] $options
      */
     private function pickOption(
         string $optionName,
@@ -122,6 +146,18 @@ class DsnParser
         }
 
         if (isset($options[$optionName])) {
+            if (!is_string($options[$optionName])) {
+                throw new InvalidArgumentException(
+                    sprintf(
+                        'Invalid "%s" for the "%s" transport. Expected string, got %s',
+                        $optionName,
+                        $transportName,
+                        get_debug_type($options[$optionName]),
+                    ),
+                    1702724695
+                );
+            }
+
             return $options[$optionName];
         }
 
