@@ -150,7 +150,9 @@ class DsnParserTest extends TestCase
         yield 'missing entity_path' => [
             'dsn' => 'azure://SharedAccessKeyName:SharedAccessKey@namespace',
             'options' => [],
-            'error' => 'Invalid "entity_path" (queue or topic) for the "my-transport" transport. Expected string, got null',
+            'error' =>
+                'Invalid "entity_path" (queue or topic) for the "my-transport" transport. ' .
+                'Expected string, got null',
             'code' => 1643989596,
         ];
 
@@ -159,7 +161,9 @@ class DsnParserTest extends TestCase
             'options' => [
                 'entity_path' => 123,
             ],
-            'error' => 'Invalid "entity_path" (queue or topic) for the "my-transport" transport. Expected string, got int',
+            'error' =>
+                'Invalid "entity_path" (queue or topic) for the "my-transport" transport. ' .
+                'Expected string, got int',
             'code' => 1643989596,
         ];
 
