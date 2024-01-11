@@ -110,7 +110,9 @@ class DsnParser
             throw new InvalidArgumentException(
                 sprintf(
                     'Invalid "%s" receive_mode for the "%s" transport. It must be one of: %s.',
-                    is_scalar($options['receive_mode']) ? $options['receive_mode'] : get_debug_type($options['receive_mode']),
+                    is_scalar($options['receive_mode']) ?
+                        $options['receive_mode'] :
+                        get_debug_type($options['receive_mode']),
                     $transportName,
                     implode(', ', self::RECEIVE_MODES)
                 ),
@@ -119,13 +121,31 @@ class DsnParser
         }
 
         return [
-            'shared_access_key_name' =>  $this->pickOption('shared_access_key_name', 'user', $parsedUrl, $options, $transportName),
-            'shared_access_key' =>  $this->pickOption('shared_access_key', 'pass', $parsedUrl, $options, $transportName),
-            'namespace' =>  $this->pickOption('namespace', 'host', $parsedUrl, $options, $transportName),
-            'entity_path' =>  $options['entity_path'],
-            'subscription' =>  $options['subscription'],
-            'token_expiry' =>  (int) $options['token_expiry'],
-            'receive_mode' =>  $options['receive_mode'],
+            'shared_access_key_name' => $this->pickOption(
+                'shared_access_key_name',
+                'user',
+                $parsedUrl,
+                $options,
+                $transportName,
+            ),
+            'shared_access_key' => $this->pickOption(
+                'shared_access_key',
+                'pass',
+                $parsedUrl,
+                $options,
+                $transportName,
+            ),
+            'namespace' => $this->pickOption(
+                'namespace',
+                'host',
+                $parsedUrl,
+                $options,
+                $transportName,
+            ),
+            'entity_path' => $options['entity_path'],
+            'subscription' => $options['subscription'],
+            'token_expiry' => (int) $options['token_expiry'],
+            'receive_mode' => $options['receive_mode'],
         ];
     }
 
