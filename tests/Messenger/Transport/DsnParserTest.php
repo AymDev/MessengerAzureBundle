@@ -150,7 +150,45 @@ class DsnParserTest extends TestCase
         yield 'missing entity_path' => [
             'dsn' => 'azure://SharedAccessKeyName:SharedAccessKey@namespace',
             'options' => [],
-            'error' => 'Missing entity_path (queue or topic) for the "my-transport" transport.',
+            'error' => 'Invalid "entity_path" (queue or topic) for the "my-transport" transport. Expected string, got null',
+            'code' => 1643989596,
+        ];
+
+        yield 'invalid entity_path' => [
+            'dsn' => 'azure://SharedAccessKeyName:SharedAccessKey@namespace',
+            'options' => [
+                'entity_path' => 123,
+            ],
+            'error' => 'Invalid "entity_path" (queue or topic) for the "my-transport" transport. Expected string, got int',
+            'code' => 1643989596,
+        ];
+
+        yield 'invalid subscription' => [
+            'dsn' => 'azure://SharedAccessKeyName:SharedAccessKey@namespace',
+            'options' => [
+                'entity_path' => 'foo',
+                'subscription' => 123,
+            ],
+            'error' => 'Invalid "subscription" for the "my-transport" transport. Expected string, got int',
+            'code' => 1643989596,
+        ];
+
+        yield 'invalid token_expiry (in options)' => [
+            'dsn' => 'azure://SharedAccessKeyName:SharedAccessKey@namespace',
+            'options' => [
+                'entity_path' => 'foo',
+                'token_expiry' => 123.45,
+            ],
+            'error' => 'Invalid "token_expiry" for the "my-transport" transport. Expected integer, got float',
+            'code' => 1643989596,
+        ];
+
+        yield 'invalid token_expiry (in DSN)' => [
+            'dsn' => 'azure://SharedAccessKeyName:SharedAccessKey@namespace?token_expiry=123.45',
+            'options' => [
+                'entity_path' => 'foo',
+            ],
+            'error' => 'Invalid "token_expiry" for the "my-transport" transport. Expected integer, got string',
             'code' => 1643989596,
         ];
 
@@ -184,12 +222,32 @@ class DsnParserTest extends TestCase
             'code' => 1702724695,
         ];
 
+        yield 'invalid shared_access_key_name' => [
+            'dsn' => 'azure://:SharedAccessKey@namespace?receive_mode=peek-lock',
+            'options' => [
+                'entity_path' => 'foo',
+                'shared_access_key_name' => 123,
+            ],
+            'error' => 'Invalid "shared_access_key_name" for the "my-transport" transport. Expected string, got int',
+            'code' => 1702724695,
+        ];
+
         yield 'missing shared_access_key' => [
             'dsn' => 'azure://SharedAccessKeyName@namespace?receive_mode=peek-lock',
             'options' => [
                 'entity_path' => 'foo',
             ],
             'error' => 'Missing shared_access_key for the "my-transport" transport.',
+            'code' => 1702724695,
+        ];
+
+        yield 'invalid shared_access_key' => [
+            'dsn' => 'azure://SharedAccessKeyName@namespace?receive_mode=peek-lock',
+            'options' => [
+                'entity_path' => 'foo',
+                'shared_access_key' => 123,
+            ],
+            'error' => 'Invalid "shared_access_key" for the "my-transport" transport. Expected string, got int',
             'code' => 1702724695,
         ];
     }
@@ -211,15 +269,5 @@ class DsnParserTest extends TestCase
         $this->expectExceptionCode($expectedCode);
 
         $parser->parseDsn($dsn, $options, 'my-transport');
-    }
-
-    public function testInvalidReceiveModeThrowsException(): void
-    {
-        $parser = new DsnParser();
-
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing entity_path (queue or topic) for the "my-transport" transport.');
-
-        $parser->parseDsn('azure://SharedAccessKeyName:SharedAccessKey@namespac', [], 'my-transport');
     }
 }
