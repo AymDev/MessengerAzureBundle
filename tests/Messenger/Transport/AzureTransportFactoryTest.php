@@ -98,9 +98,6 @@ final class AzureTransportFactoryTest extends TestCase
             self::createMock(SerializerInterface::class)
         );
 
-        // PHPStan is clever enough to realize that the transport is an AzureTransport but
-        // the createTransport method technically still returns a TransportInterface
-        // @phpstan-ignore-next-line
         self::assertInstanceOf(AzureTransport::class, $transport);
     }
 }
