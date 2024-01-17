@@ -9,24 +9,51 @@ use PHPUnit\Framework\TestCase;
 
 class DsnParserTest extends TestCase
 {
-    public function testParseValidDsn(): void
+    /**
+     * @return iterable<string, array{dsn: string, options: mixed[], expectedResult: mixed[]}>
+     */
+    public static function provideValidConfigurations(): iterable
+    {
+        yield 'simple DSN' => [
+            'dsn' => 'azure://key-name:key-value@namespace-name',
+            'options' => ['entity_path' => 'path'],
+            'expectedResult' => [
+                'entity_path' => 'path',
+                'shared_access_key_name' => 'key-name',
+                'shared_access_key' => 'key-value',
+                'namespace' => 'namespace-name',
+                'subscription' => null,
+                'token_expiry' => 3600,
+                'receive_mode' => 'peek-lock',
+            ],
+        ];
+
+        yield 'custom token_expiry in query' => [
+            'dsn' => 'azure://key-name:key-value@namespace-name?token_expiry=7200',
+            'options' => ['entity_path' => 'path'],
+            'expectedResult' => [
+                'entity_path' => 'path',
+                'shared_access_key_name' => 'key-name',
+                'shared_access_key' => 'key-value',
+                'namespace' => 'namespace-name',
+                'subscription' => null,
+                'token_expiry' => 7200,
+                'receive_mode' => 'peek-lock',
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider provideValidConfigurations
+     * @param mixed[] $options
+     * @param mixed[] $expectedResult
+     */
+    public function testParseValidDsn(string $dsn, array $options, array $expectedResult): void
     {
         $parser = new DsnParser();
-        $result = $parser->parseDsn(
-            'azure://key-name:key-value@namespace-name',
-            ['entity_path' => 'path'],
-            'my-transport',
-        );
+        $result = $parser->parseDsn($dsn, $options, 'my-transport');
 
-        self::assertEquals([
-            'entity_path' => 'path',
-            'shared_access_key_name' => 'key-name',
-            'shared_access_key' => 'key-value',
-            'namespace' => 'namespace-name',
-            'subscription' => null,
-            'token_expiry' => 3600,
-            'receive_mode' => 'peek-lock',
-        ], $result);
+        self::assertEquals($expectedResult, $result);
     }
 
     public function testDsnOptionsAreUrlDecoded(): void

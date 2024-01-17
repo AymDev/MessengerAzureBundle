@@ -95,7 +95,10 @@ class DsnParser
             );
         }
 
-        if (!is_int($options['token_expiry']) && !ctype_digit($options['token_expiry'])) {
+        if (
+            !is_int($options['token_expiry']) &&
+            !(is_string($options['token_expiry']) && ctype_digit($options['token_expiry']))
+        ) {
             throw new InvalidArgumentException(
                 sprintf(
                     'Invalid "token_expiry" for the "%s" transport. Expected integer, got %s',
