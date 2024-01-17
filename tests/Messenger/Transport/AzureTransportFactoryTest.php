@@ -77,4 +77,30 @@ final class AzureTransportFactoryTest extends TestCase
             self::createMock(SerializerInterface::class)
         );
     }
+
+    /**
+     * The factory must return an Azure transport
+     */
+    public function testCreateTransport(): void
+    {
+        $factory = new AzureTransportFactory(
+            new DsnParser(),
+            new AzureHttpClientConfigurationBuilder(),
+            new AzureHttpClientFactory()
+        );
+
+        $transport = $factory->createTransport(
+            'azure://KeyName:Key@namespace',
+            [
+                'transport_name' => 'test-transport',
+                'entity_path' => 'entity',
+            ],
+            self::createMock(SerializerInterface::class)
+        );
+
+        // PHPStan is clever enough to realize that the transport is an AzureTransport but
+        // the createTransport method technically still returns a TransportInterface
+        // @phpstan-ignore-next-line
+        self::assertInstanceOf(AzureTransport::class, $transport);
+    }
 }
