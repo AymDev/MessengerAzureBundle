@@ -1,7 +1,11 @@
 parameters:
-	level: 9
-	paths:
-	    - src
-	    - tests
-	bootstrapFiles:
-	    - vendor/bin/.phpunit/phpunit-9.5-0/vendor/autoload.php
+    level: 9
+    paths:
+        - src
+        - tests
+    bootstrapFiles:
+        - vendor/bin/.phpunit/phpunit-9.5-0/vendor/autoload.php
+    ignoreErrors:
+        - message: '#^Class AymDev\\MessengerAzureBundle\\Messenger\\Transport\\AzureTransportFactory implements generic interface Symfony\\Component\\Messenger\\Transport\\TransportFactoryInterface but does not specify its types\: TTransport$#'
+          path: src/Messenger/Transport/AzureTransportFactory.php
+          reportUnmatched: false

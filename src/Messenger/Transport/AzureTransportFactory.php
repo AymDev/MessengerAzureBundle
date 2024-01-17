@@ -11,8 +11,6 @@ use Symfony\Component\Messenger\Transport\TransportInterface;
 /**
  * Messenger transport factory for Azure Service Bus
  * @internal
- *
- * @implements TransportFactoryInterface<AzureTransport>
  */
 final class AzureTransportFactory implements TransportFactoryInterface
 {
