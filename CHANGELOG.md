@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2024-01-28
+### Added
+ - Allowed transport configuration through DSN: [PR #14](https://github.com/AymDev/MessengerAzureBundle/pull/14)
+
 ## [1.4.0] - 2022-11-22
 ### Added
  - Introduced `AzureBrokerPropertiesStamp::createFromJson` for testing: [PR #7](https://github.com/AymDev/MessengerAzureBundle/pull/7)
@@ -42,7 +46,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - **Symfony Messenger** transport for **Azure Service Bus** *queues* and *topics*
 
-[Unreleased]: https://github.com/AymDev/MessengerAzureBundle/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/AymDev/MessengerAzureBundle/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/AymDev/MessengerAzureBundle/releases/tag/v1.5.0
 [1.4.0]: https://github.com/AymDev/MessengerAzureBundle/releases/tag/v1.4.0
 [1.3.1]: https://github.com/AymDev/MessengerAzureBundle/releases/tag/v1.3.1
 [1.3.0]: https://github.com/AymDev/MessengerAzureBundle/releases/tag/v1.3.0
