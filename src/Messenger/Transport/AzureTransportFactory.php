@@ -14,23 +14,11 @@ use Symfony\Component\Messenger\Transport\TransportInterface;
  */
 final class AzureTransportFactory implements TransportFactoryInterface
 {
-    /** @var DsnParser */
-    private $dsnParser;
-
-    /** @var AzureHttpClientConfigurationBuilder */
-    private $httpClientConfigurationBuilder;
-
-    /** @var AzureHttpClientFactory */
-    private $httpClientFactory;
-
     public function __construct(
-        DsnParser $dsnParser,
-        AzureHttpClientConfigurationBuilder $httpClientConfigurationBuilder,
-        AzureHttpClientFactory $httpClientFactory
+        private readonly DsnParser $dsnParser,
+        private readonly AzureHttpClientConfigurationBuilder $httpClientConfigurationBuilder,
+        private readonly AzureHttpClientFactory $httpClientFactory
     ) {
-        $this->dsnParser = $dsnParser;
-        $this->httpClientConfigurationBuilder = $httpClientConfigurationBuilder;
-        $this->httpClientFactory = $httpClientFactory;
     }
 
     /**
@@ -38,7 +26,7 @@ final class AzureTransportFactory implements TransportFactoryInterface
      */
     public function supports(string $dsn, array $options): bool
     {
-        return 0 === strpos($dsn, 'azure://');
+        return str_starts_with($dsn, 'azure://');
     }
 
     /**

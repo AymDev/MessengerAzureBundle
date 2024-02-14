@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Messenger\Stamp;
+namespace Tests\AymDev\MessengerAzureBundle\Messenger\Stamp;
 
 use AymDev\MessengerAzureBundle\Messenger\Stamp\AzureMessageStamp;
 use PHPUnit\Framework\TestCase;

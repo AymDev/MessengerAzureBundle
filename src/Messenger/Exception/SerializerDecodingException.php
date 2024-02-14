@@ -16,8 +16,7 @@ use Throwable;
  */
 final class SerializerDecodingException extends MessageDecodingFailedException
 {
-    /** @var Envelope */
-    private $envelope;
+    private Envelope $envelope;
 
     /**
      * @param Envelope $envelope an envelope with an empty message

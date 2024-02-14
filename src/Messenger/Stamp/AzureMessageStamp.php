@@ -14,33 +14,17 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
  */
 class AzureMessageStamp implements StampInterface
 {
-    /** @var string */
-    private $entityPath;
-
-    /** @var string */
-    private $message;
-
-    /** @var null|string */
-    private $subscriptionName;
-
-    /** @var string|null */
-    private $locationHeader;
-
     /**
      * @internal
      * @param string $message the original message
      * @param string|null $locationHeader optional "Location" response header
      */
     public function __construct(
-        string $entityPath,
-        string $message,
-        ?string $subscriptionName = null,
-        ?string $locationHeader = null
+        private readonly string $entityPath,
+        private readonly string $message,
+        private readonly ?string $subscriptionName = null,
+        private readonly ?string $locationHeader = null
     ) {
-        $this->entityPath = $entityPath;
-        $this->message = $message;
-        $this->subscriptionName = $subscriptionName;
-        $this->locationHeader = $locationHeader;
     }
 
     /**

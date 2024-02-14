@@ -14,88 +14,24 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
  */
 class AzureBrokerPropertiesStamp implements StampInterface
 {
-    /** @var string|null */
-    private $contentType;
-
-    /** @var string|null */
-    private $correlationId;
-
-    /** @var string|null */
-    private $sessionId;
-
-    /** @var int|null */
-    private $deliveryCount;
-
-    /** @var \DateTimeInterface|null */
-    private $lockedUntilUtc;
-
-    /** @var string|null*/
-    private $lockToken;
-
-    /** @var string|null*/
-    private $messageId;
-
-    /** @var string|null*/
-    private $label;
-
-    /** @var string|null */
-    private $replyTo;
-
-    /** @var \DateTimeInterface|null */
-    private $enqueuedTimeUtc;
-
-    /** @var int|null */
-    private $sequenceNumber;
-
-    /** @var int|null */
-    private $timeToLive;
-
-    /** @var string|null */
-    private $to;
-
-    /** @var \DateTimeInterface|null */
-    private $scheduledEnqueueTimeUtc;
-
-    /** @var string|null */
-    private $replyToSessionId;
-
-    /** @var string|null */
-    private $partitionKey;
-
     public function __construct(
-        ?string $contentType = null,
-        ?string $correlationId = null,
-        ?string $sessionId = null,
-        ?int $deliveryCount = null,
-        ?\DateTimeInterface $lockedUntilUtc = null,
-        ?string $lockToken = null,
-        ?string $messageId = null,
-        ?string $label = null,
-        ?string $replyTo = null,
-        ?\DateTimeInterface $enqueuedTimeUtc = null,
-        ?int $sequenceNumber = null,
-        ?int $timeToLive = null,
-        ?string $to = null,
-        ?\DateTimeInterface $scheduledEnqueueTimeUtc = null,
-        ?string $replyToSessionId = null,
-        ?string $partitionKey = null
+        private ?string $contentType = null,
+        private ?string $correlationId = null,
+        private ?string $sessionId = null,
+        private readonly ?int $deliveryCount = null,
+        private readonly ?\DateTimeInterface $lockedUntilUtc = null,
+        private readonly ?string $lockToken = null,
+        private ?string $messageId = null,
+        private ?string $label = null,
+        private ?string $replyTo = null,
+        private readonly ?\DateTimeInterface $enqueuedTimeUtc = null,
+        private readonly ?int $sequenceNumber = null,
+        private ?int $timeToLive = null,
+        private ?string $to = null,
+        private ?\DateTimeInterface $scheduledEnqueueTimeUtc = null,
+        private ?string $replyToSessionId = null,
+        private ?string $partitionKey = null
     ) {
-        $this->contentType = $contentType;
-        $this->correlationId = $correlationId;
-        $this->sessionId = $sessionId;
-        $this->deliveryCount = $deliveryCount;
-        $this->lockedUntilUtc = $lockedUntilUtc;
-        $this->lockToken = $lockToken;
-        $this->messageId = $messageId;
-        $this->label = $label;
-        $this->replyTo = $replyTo;
-        $this->enqueuedTimeUtc = $enqueuedTimeUtc;
-        $this->sequenceNumber = $sequenceNumber;
-        $this->timeToLive = $timeToLive;
-        $this->to = $to;
-        $this->scheduledEnqueueTimeUtc = $scheduledEnqueueTimeUtc;
-        $this->replyToSessionId = $replyToSessionId;
-        $this->partitionKey = $partitionKey;
     }
 
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Messenger\Exception;
+namespace Tests\AymDev\MessengerAzureBundle\Messenger\Exception;
 
 use AymDev\MessengerAzureBundle\Messenger\Exception\SerializerDecodingException;
 use AymDev\MessengerAzureBundle\Messenger\Transport\EmptyMessage;

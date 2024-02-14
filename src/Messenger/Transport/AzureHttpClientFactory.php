@@ -32,6 +32,6 @@ class AzureHttpClientFactory
             $options['token_expiry']
         );
 
-        return new AzureHttpClient($httpClient, $sasTokenGenerator);
+        return new AzureHttpClient($sasTokenGenerator, $httpClient);
     }
 }

@@ -6,24 +6,12 @@ namespace AymDev\MessengerAzureBundle\Messenger\Transport;
 
 class SasTokenGenerator
 {
-    /** @var string */
-    private $endpoint;
-
-    /** @var string */
-    private $accessKeyName;
-
-    /** @var string */
-    private $accessKey;
-
-    /** @var int */
-    private $tokenExpiry;
-
-    public function __construct(string $endpoint, string $accessKeyName, string $accessKey, int $tokenExpiry)
-    {
-        $this->endpoint = $endpoint;
-        $this->accessKeyName = $accessKeyName;
-        $this->accessKey = $accessKey;
-        $this->tokenExpiry = $tokenExpiry;
+    public function __construct(
+        private readonly string $endpoint,
+        private readonly string $accessKeyName,
+        private readonly string $accessKey,
+        private readonly int $tokenExpiry
+    ) {
     }
 
     /**

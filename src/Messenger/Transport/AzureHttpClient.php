@@ -12,13 +12,11 @@ class AzureHttpClient implements HttpClientInterface
 {
     use DecoratorTrait;
 
-    /** @var SasTokenGenerator */
-    private $sasTokenGenerator;
-
-    public function __construct(HttpClientInterface $client, SasTokenGenerator $sasTokenGenerator)
-    {
+    public function __construct(
+        private readonly SasTokenGenerator $sasTokenGenerator,
+        HttpClientInterface $client,
+    ) {
         $this->client = $client;
-        $this->sasTokenGenerator = $sasTokenGenerator;
     }
 
     /**

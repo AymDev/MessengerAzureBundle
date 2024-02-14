@@ -7,7 +7,7 @@
     <arg name="colors"/>
     <arg name="extensions" value="php"/>
 
-    <config name="testVersion" value="7.3-" />
+    <config name="testVersion" value="8.1-" />
 
     <rule ref="PSR12"/>
     <rule ref="PHPCompatibility"/>

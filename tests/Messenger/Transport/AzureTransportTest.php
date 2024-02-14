@@ -187,8 +187,6 @@ final class AzureTransportTest extends TestCase
         self::assertCount(1, $result);
 
         $envelope = $result[0];
-        $azureReceivedStamp = $envelope->last(AzureReceivedStamp::class);
-        self::assertInstanceOf(AzureReceivedStamp::class, $azureReceivedStamp);
 
         $azureMessageStamp = $envelope->last(AzureMessageStamp::class);
         self::assertInstanceOf(AzureMessageStamp::class, $azureMessageStamp);

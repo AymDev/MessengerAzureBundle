@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2024-02-14
+### Removed
+ - removed deprecated stamp `AzureReceivedStamp`
+
+### Changed
+ - upgraded minimum supported version to **PHP 8.1** and **Symfony LTS** or **7**
+
+### Added
+ - documented side effect from **v1.5** with non encoded characters in the DSN
+
 ## [1.5.0] - 2024-01-28
 ### Added
  - Allowed transport configuration through DSN: [PR #14](https://github.com/AymDev/MessengerAzureBundle/pull/14)
@@ -46,7 +56,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - **Symfony Messenger** transport for **Azure Service Bus** *queues* and *topics*
 
-[Unreleased]: https://github.com/AymDev/MessengerAzureBundle/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/AymDev/MessengerAzureBundle/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/AymDev/MessengerAzureBundle/releases/tag/v2.0.0
 [1.5.0]: https://github.com/AymDev/MessengerAzureBundle/releases/tag/v1.5.0
 [1.4.0]: https://github.com/AymDev/MessengerAzureBundle/releases/tag/v1.4.0
 [1.3.1]: https://github.com/AymDev/MessengerAzureBundle/releases/tag/v1.3.1

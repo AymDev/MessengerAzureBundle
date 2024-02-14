@@ -7,28 +7,24 @@ namespace AymDev\MessengerAzureBundle\Messenger\Transport;
 /**
  * Configuration builder for the Azure transports HTTP clients
  * @internal
+ *
+ * @phpstan-import-type AzureMessengerTransportOptions from DsnParser
+ *
+ * @phpstan-type AzureHttpClientOptions array{
+ *      endpoint: string,
+ *      shared_access_key_name: string,
+ *      shared_access_key: string,
+ *      token_expiry: int,
+ *      options: array{headers: array<string, string>},
+ *  }
  */
 final class AzureHttpClientConfigurationBuilder
 {
     /**
      * Build configuration for a sender HttpClient transport
      *
-     * @param array{
-     *     shared_access_key_name: string,
-     *     shared_access_key: string,
-     *     namespace: string,
-     *     entity_path: string,
-     *     subscription: string|null,
-     *     token_expiry: int,
-     *     receive_mode: AzureTransport::RECEIVE_MODE_*,
-     * } $options
-     * @return array{
-     *     endpoint: string,
-     *     shared_access_key_name: string,
-     *     shared_access_key: string,
-     *     token_expiry: int,
-     *     options: array{headers: array<string, string>},
-     * }
+     * @param AzureMessengerTransportOptions $options
+     * @return AzureHttpClientOptions
      */
     public function buildSenderConfiguration(array $options): array
     {
@@ -38,22 +34,8 @@ final class AzureHttpClientConfigurationBuilder
     /**
      * Build configuration for a receiver HttpClient transport
      *
-     * @param array{
-     *     shared_access_key_name: string,
-     *     shared_access_key: string,
-     *     namespace: string,
-     *     entity_path: string,
-     *     subscription: string|null,
-     *     token_expiry: int,
-     *     receive_mode: AzureTransport::RECEIVE_MODE_*,
-     * } $options
-     * @return array{
-     *     endpoint: string,
-     *     shared_access_key_name: string,
-     *     shared_access_key: string,
-     *     token_expiry: int,
-     *     options: array{headers: array<string, string>},
-     * }
+     * @param AzureMessengerTransportOptions $options
+     * @return AzureHttpClientOptions
      */
     public function buildReceiverConfiguration(array $options): array
     {
@@ -61,22 +43,8 @@ final class AzureHttpClientConfigurationBuilder
     }
 
     /**
-     * @param array{
-     *     shared_access_key_name: string,
-     *     shared_access_key: string,
-     *     namespace: string,
-     *     entity_path: string,
-     *     subscription: string|null,
-     *     token_expiry: int,
-     *     receive_mode: AzureTransport::RECEIVE_MODE_*,
-     * } $options
-     * @return array{
-     *     endpoint: string,
-     *     shared_access_key_name: string,
-     *     shared_access_key: string,
-     *     token_expiry: int,
-     *     options: array{headers: array<string, string>},
-     * }
+     * @param AzureMessengerTransportOptions $options
+     * @return AzureHttpClientOptions
      */
     private function buildConfiguration(bool $isReceiver, array $options): array
     {

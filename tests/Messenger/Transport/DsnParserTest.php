@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Messenger\Transport;
+namespace Tests\AymDev\MessengerAzureBundle\Messenger\Transport;
 
 use AymDev\MessengerAzureBundle\Messenger\Transport\DsnParser;
 use PHPUnit\Framework\TestCase;

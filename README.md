@@ -1,5 +1,5 @@
 # Messenger Azure Service Bus Bundle
-A **Symfony 4 / 5 / 6** bundle providing a **Symfony Messenger** *transport* for **Azure Service Bus** using the *Azure REST API*.
+A **PHP 8.1+** & **Symfony 5 / 6 / 7** bundle providing a **Symfony Messenger** *transport* for **Azure Service Bus** using the *Azure REST API*.
 
 ![Testing](https://github.com/AymDev/MessengerAzureBundle/workflows/Testing/badge.svg)
 ![Coding Standards](https://github.com/AymDev/MessengerAzureBundle/workflows/Coding%20Standards/badge.svg)
@@ -30,6 +30,8 @@ azure://KEY_NAME:KEY_VALUE@NAMESPACE
 ```
 >Where `KEY_NAME` is your **shared access key name**, `KEY_VALUE` is your **shared access key** and `NAMESPACE` is your
 >*Azure Service Bus* **namespace**.
+>**Important note:** the keys can contain special characters that could break the URL parsing. Be sure to URL encode
+>them.
 
 ### Transport options
 
@@ -75,11 +77,6 @@ contains:
 
 The `AymDev\MessengerAzureBundle\Messenger\Stamp\AzureBrokerPropertiesStamp` stamp is used for the [message properties](https://docs.microsoft.com/en-us/rest/api/servicebus/message-headers-and-properties).
 It is automatically decoded when consuming a message and is encoded when producing a message if added to the *envelope*.
-
-### AzureReceivedStamp
-
-The `AymDev\MessengerAzureBundle\Messenger\Stamp\AzureReceivedStamp` stamp holds the original message body and an optional deletion URL.
->This stamp is deprecated in favor of the AzureMessageStamp and will be removed in v2.
 
 ## Serialization
 

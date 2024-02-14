@@ -6,6 +6,17 @@ namespace AymDev\MessengerAzureBundle\Messenger\Transport;
 
 use Symfony\Component\Messenger\Exception\InvalidArgumentException;
 
+/**
+ * @phpstan-type AzureMessengerTransportOptions array{
+ *      shared_access_key_name: string,
+ *      shared_access_key: string,
+ *      namespace: string,
+ *      entity_path: string,
+ *      subscription: string|null,
+ *      token_expiry: int,
+ *      receive_mode: AzureTransport::RECEIVE_MODE_*,
+ *  }
+ */
 class DsnParser
 {
     private const RECEIVE_MODES = [
@@ -27,15 +38,7 @@ class DsnParser
      * Parse the DSN and merges it with options.
      *
      * @param mixed[] $options
-     * @return array{
-     *     shared_access_key_name: string,
-     *     shared_access_key: string,
-     *     namespace: string,
-     *     entity_path: string,
-     *     subscription: string|null,
-     *     token_expiry: int,
-     *     receive_mode: AzureTransport::RECEIVE_MODE_*,
-     * }
+     * @return AzureMessengerTransportOptions
      */
     public function parseDsn(string $dsn, array $options, string $transportName): array
     {
@@ -43,6 +46,7 @@ class DsnParser
         if (false === $parsedUrl || ($parsedUrl['scheme'] ?? '') !== 'azure') {
             $message = sprintf('Invalid Azure Service Bus DSN for the "%s" transport. ', $transportName);
             $message .= 'It must be in the following format: azure://SharedAccessKeyName:SharedAccessKey@namespace';
+            $message .= 'and the keys must be URL encoded.';
             throw new InvalidArgumentException($message, 1643988474);
         }
 

@@ -7,7 +7,6 @@ namespace AymDev\MessengerAzureBundle\Messenger\Transport;
 use AymDev\MessengerAzureBundle\Messenger\Exception\SerializerDecodingException;
 use AymDev\MessengerAzureBundle\Messenger\Stamp\AzureBrokerPropertiesStamp;
 use AymDev\MessengerAzureBundle\Messenger\Stamp\AzureMessageStamp;
-use AymDev\MessengerAzureBundle\Messenger\Stamp\AzureReceivedStamp;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\MessageDecodingFailedException;
 use Symfony\Component\Messenger\Exception\TransportException;
@@ -29,38 +28,14 @@ final class AzureTransport implements TransportInterface
     public const RECEIVE_MODE_PEEK_LOCK = 'peek-lock';
     public const RECEIVE_MODE_RECEIVE_AND_DELETE = 'receive-and-delete';
 
-    /** @var SerializerInterface */
-    private $serializer;
-
-    /** @var HttpClientInterface */
-    private $senderClient;
-
-    /** @var HttpClientInterface */
-    private $receiverClient;
-
-    /** @var string */
-    private $receiveMode;
-
-    /** @var string */
-    private $entityPath;
-
-    /** @var string|null */
-    private $subscriptionName;
-
     public function __construct(
-        SerializerInterface $serializer,
-        HttpClientInterface $senderClient,
-        HttpClientInterface $receiverClient,
-        string $receiveMode,
-        string $entityPath,
-        ?string $subscriptionName = null
+        private readonly SerializerInterface $serializer,
+        private readonly HttpClientInterface $senderClient,
+        private readonly HttpClientInterface $receiverClient,
+        private readonly string $receiveMode,
+        private readonly string $entityPath,
+        private readonly ?string $subscriptionName = null
     ) {
-        $this->serializer = $serializer;
-        $this->senderClient = $senderClient;
-        $this->receiverClient = $receiverClient;
-        $this->receiveMode = $receiveMode;
-        $this->entityPath = $entityPath;
-        $this->subscriptionName = $subscriptionName;
     }
 
     /**
@@ -126,7 +101,6 @@ final class AzureTransport implements TransportInterface
     {
         $brokerPropertiesStamp = AzureBrokerPropertiesStamp::createFromResponse($response);
         $envelope = $envelope
-            ->with(AzureReceivedStamp::createFromResponse($response))
             ->with(AzureMessageStamp::createFromResponse($response, $this->entityPath, $this->subscriptionName))
             ->with($brokerPropertiesStamp)
         ;
