@@ -151,7 +151,7 @@ final class AzureBrokerPropertiesStampTest extends TestCase
         self::assertSame($enqueuedTimeUtc, $stamp->getEnqueuedTimeUtc()->format('Y-m-d H:i:s'));
 
         self::assertSame($sequenceNumber, $stamp->getSequenceNumber());
-        self::assertSame($timeToLive, $stamp->getTimeToLive());
+        self::assertSame(floatval($timeToLive), $stamp->getTimeToLive());
         self::assertSame($to, $stamp->getTo());
 
         self::assertInstanceOf(\DateTimeInterface::class, $stamp->getScheduledEnqueueTimeUtc());
