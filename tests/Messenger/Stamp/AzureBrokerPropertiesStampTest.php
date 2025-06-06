@@ -99,7 +99,7 @@ final class AzureBrokerPropertiesStampTest extends TestCase
         $replyTo = 'test-reply-to';
         $enqueuedTimeUtc = '1970-01-01 00:00:00';
         $sequenceNumber = 2;
-        $timeToLive = 3;
+        $timeToLive = 3.12;
         $to = 'test-to';
         $scheduledEnqueueTimeUtc = '1970-01-01 00:00:00';
         $replyToSessionId = 'test-reply-to-session-id';

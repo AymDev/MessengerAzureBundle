@@ -26,7 +26,7 @@ class AzureBrokerPropertiesStamp implements StampInterface
         private ?string $replyTo = null,
         private readonly ?\DateTimeInterface $enqueuedTimeUtc = null,
         private readonly ?int $sequenceNumber = null,
-        private ?int $timeToLive = null,
+        private ?float $timeToLive = null,
         private ?string $to = null,
         private ?\DateTimeInterface $scheduledEnqueueTimeUtc = null,
         private ?string $replyToSessionId = null,
@@ -65,7 +65,7 @@ class AzureBrokerPropertiesStamp implements StampInterface
          *     ReplyTo?: string,
          *     EnqueuedTimeUtc?: string,
          *     SequenceNumber?: int,
-         *     TimeToLive?: int,
+         *     TimeToLive?: float,
          *     To?: string,
          *     ScheduledEnqueueTimeUtc?: string,
          *     ReplyToSessionId?: string,
@@ -93,6 +93,11 @@ class AzureBrokerPropertiesStamp implements StampInterface
             $scheduledEnqueueTimeUtc = $scheduledEnqueueTimeUtc->setTimezone($defaultTimeZone);
         }
 
+        $timeToLive = null;
+        if (isset($properties['TimeToLive']) && is_numeric($properties['TimeToLive'])) {
+            $timeToLive = floatval($properties['TimeToLive']);
+        }
+
         return new self(
             $properties['ContentType'] ?? null,
             $properties['CorrelationId'] ?? null,
@@ -105,7 +110,7 @@ class AzureBrokerPropertiesStamp implements StampInterface
             $properties['ReplyTo'] ?? null,
             $enqueuedTimeUtc,
             $properties['SequenceNumber'] ?? null,
-            $properties['TimeToLive'] ?? null,
+            $timeToLive,
             $properties['To'] ?? null,
             $scheduledEnqueueTimeUtc,
             $properties['ReplyToSessionId'] ?? null,
@@ -243,12 +248,12 @@ class AzureBrokerPropertiesStamp implements StampInterface
         return $this->sequenceNumber;
     }
 
-    public function getTimeToLive(): ?int
+    public function getTimeToLive(): ?float
     {
         return $this->timeToLive;
     }
 
-    public function setTimeToLive(?int $timeToLive): self
+    public function setTimeToLive(?float $timeToLive): self
     {
         $this->timeToLive = $timeToLive;
         return $this;
