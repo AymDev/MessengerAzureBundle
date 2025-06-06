@@ -94,7 +94,7 @@ class AzureBrokerPropertiesStamp implements StampInterface
         }
 
         $timeToLive = null;
-        if (isset($properties['TimeToLive']) && is_numeric($properties['TimeToLive'])) {
+        if (isset($properties['TimeToLive'])) {
             $timeToLive = floatval($properties['TimeToLive']);
         }
 
