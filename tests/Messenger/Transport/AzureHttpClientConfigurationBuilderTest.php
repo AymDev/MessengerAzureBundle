@@ -6,15 +6,16 @@ namespace Tests\AymDev\MessengerAzureBundle\Messenger\Transport;
 
 use AymDev\MessengerAzureBundle\Messenger\Transport\AzureHttpClientConfigurationBuilder;
 use AymDev\MessengerAzureBundle\Messenger\Transport\AzureTransport;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 final class AzureHttpClientConfigurationBuilderTest extends TestCase
 {
     /**
      * Check default configurations
-     * @dataProvider provideClientConfiguration
      * @param mixed[] $configuration
      */
+    #[DataProvider('provideClientConfiguration')]
     public function testDefaultConfiguration(bool $isSender, array $configuration): void
     {
         self::assertArrayHasKey('endpoint', $configuration);
@@ -39,7 +40,7 @@ final class AzureHttpClientConfigurationBuilderTest extends TestCase
     /**
      * @return mixed[][]
      */
-    public function provideClientConfiguration(): array
+    public static function provideClientConfiguration(): array
     {
         $options = [
             'shared_access_key_name' => 'KeyName',

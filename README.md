@@ -1,5 +1,5 @@
 # Messenger Azure Service Bus Bundle
-A **PHP 8.1+** & **Symfony 5 / 6 / 7** bundle providing a **Symfony Messenger** *transport* for **Azure Service Bus** using the *Azure REST API*.
+A **PHP 8.4+** & **Symfony 6 / 7 / 8** bundle providing a **Symfony Messenger** *transport* for **Azure Service Bus** using the *Azure REST API*.
 
 ![Testing](https://github.com/AymDev/MessengerAzureBundle/workflows/Testing/badge.svg)
 ![Coding Standards](https://github.com/AymDev/MessengerAzureBundle/workflows/Coding%20Standards/badge.svg)

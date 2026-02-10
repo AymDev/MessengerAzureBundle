@@ -1,10 +1,13 @@
-name: Coding Standards
+name: Static Analysis
 on: [push, pull_request]
 
 jobs:
-    coding-standards:
-        name: PHP CodeSniffer
+    unit-tests:
+        name: PHP ${{ matrix.php }} - PHPStan
         runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                php: ['8.4', '8.5']
 
         steps:
             # Setup
@@ -14,7 +17,7 @@ jobs:
             -   name: PHP setup
                 uses: shivammathur/setup-php@v2
                 with:
-                    php-version: 8.4
+                    php-version: ${{ matrix.php }}
                     extensions: mbstring, xml, ctype, iconv, intl
                     coverage: xdebug
 
@@ -33,6 +36,6 @@ jobs:
             -   name: Install dependencies
                 run: composer install --prefer-dist
 
-            # Run PHP CodeSniffer
-            -   name: Run PHP CodeSniffer
-                run: php vendor/bin/phpcs
+            # Run PHPStan
+            -   name: Run PHPStan
+                run: php vendor/bin/phpstan

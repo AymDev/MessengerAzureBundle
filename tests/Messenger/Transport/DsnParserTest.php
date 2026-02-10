@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\AymDev\MessengerAzureBundle\Messenger\Transport;
 
 use AymDev\MessengerAzureBundle\Messenger\Transport\DsnParser;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class DsnParserTest extends TestCase
@@ -44,10 +45,10 @@ class DsnParserTest extends TestCase
     }
 
     /**
-     * @dataProvider provideValidConfigurations
      * @param mixed[] $options
      * @param mixed[] $expectedResult
      */
+    #[DataProvider('provideValidConfigurations')]
     public function testParseValidDsn(string $dsn, array $options, array $expectedResult): void
     {
         $parser = new DsnParser();
@@ -79,7 +80,7 @@ class DsnParserTest extends TestCase
     /**
      * @return iterable<string, array{dsn: string, options: mixed[], expected: mixed[]}>
      */
-    public function provideMergingOrderTestData(): iterable
+    public static function provideMergingOrderTestData(): iterable
     {
         yield 'dsn options' => [
             'dsn' => 'azure://key-name:key-value@namespace-name?entity_path=entity-path&token_expiry=7200',
@@ -121,16 +122,16 @@ class DsnParserTest extends TestCase
     }
 
     /**
-     * @dataProvider provideMergingOrderTestData
      * @param mixed[] $options
-     * @param mixed[] $expectedResult
+     * @param mixed[] $expected
      */
-    public function testOptionsMergingOrder(string $dsn, array $options, array $expectedResult): void
+    #[DataProvider('provideMergingOrderTestData')]
+    public function testOptionsMergingOrder(string $dsn, array $options, array $expected): void
     {
         $parser = new DsnParser();
         $result = $parser->parseDsn($dsn, $options, 'my-transport');
 
-        self::assertSame($expectedResult, $result);
+        self::assertSame($expected, $result);
     }
 
     /**
@@ -284,20 +285,20 @@ class DsnParserTest extends TestCase
     }
 
     /**
-     * @dataProvider provideInvalidConfigurations
      * @param mixed[] $options
      */
+    #[DataProvider('provideInvalidConfigurations')]
     public function testInvalidConfigThrowsException(
         string $dsn,
         array $options,
-        string $expectedError,
-        int $expectedCode = 0
+        string $error,
+        int $code = 0
     ): void {
         $parser = new DsnParser();
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage($expectedError);
-        $this->expectExceptionCode($expectedCode);
+        $this->expectExceptionMessage($error);
+        $this->expectExceptionCode($code);
 
         $parser->parseDsn($dsn, $options, 'my-transport');
     }

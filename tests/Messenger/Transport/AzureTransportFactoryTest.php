@@ -49,7 +49,7 @@ final class AzureTransportFactoryTest extends TestCase
             [
                 'transport_name' => 'test-transport',
             ],
-            self::createMock(SerializerInterface::class)
+            self::createStub(SerializerInterface::class)
         );
     }
 
@@ -74,7 +74,7 @@ final class AzureTransportFactoryTest extends TestCase
                 'entity_path' => 'entity',
                 'receive_mode' => 'invalid',
             ],
-            self::createMock(SerializerInterface::class)
+            self::createStub(SerializerInterface::class)
         );
     }
 
@@ -95,7 +95,7 @@ final class AzureTransportFactoryTest extends TestCase
                 'transport_name' => 'test-transport',
                 'entity_path' => 'entity',
             ],
-            self::createMock(SerializerInterface::class)
+            self::createStub(SerializerInterface::class)
         );
 
         self::assertInstanceOf(AzureTransport::class, $transport);

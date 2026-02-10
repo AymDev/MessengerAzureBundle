@@ -70,6 +70,15 @@ final class AzureTransport implements TransportInterface
             );
         }
 
+        $headers = array_map(
+            function ($h) {
+                $last = array_key_last($h);
+                return null === $last ? null : $h[$last];
+            },
+            $headers
+        );
+        $headers = array_filter($headers, is_string(...));
+
         // Decode message
         try {
             $envelope = $this->serializer->decode([
@@ -158,9 +167,6 @@ final class AzureTransport implements TransportInterface
 
         // Decode message
         $encodedMessage = $this->serializer->encode($envelope);
-        if (!isset($encodedMessage['body'])) {
-            throw new \LogicException('Missing encoded message body.', 1644403794);
-        }
         if (isset($encodedMessage['headers'])) {
             $additionalHeaders = array_merge($additionalHeaders, $encodedMessage['headers']);
         }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\AymDev\MessengerAzureBundle\Messenger\Stamp;
 
 use AymDev\MessengerAzureBundle\Messenger\Stamp\AzureBrokerPropertiesStamp;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -13,8 +14,8 @@ final class AzureBrokerPropertiesStampTest extends TestCase
 {
     /**
      * The "BrokerProperties" header and its properties must be optional
-     * @dataProvider provideMissingBrokerPropertiesResponses
      */
+    #[DataProvider('provideMissingBrokerPropertiesResponses')]
     public function testCreateFromResponseWithMissingProperties(MockResponse $mockResponse): void
     {
         $httpClient = new MockHttpClient([$mockResponse]);
@@ -43,7 +44,7 @@ final class AzureBrokerPropertiesStampTest extends TestCase
     /**
      * @return MockResponse[][]
      */
-    public function provideMissingBrokerPropertiesResponses(): array
+    public static function provideMissingBrokerPropertiesResponses(): array
     {
         return [
             [
