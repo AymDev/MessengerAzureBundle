@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+ - Symfony 8 support
+
+### Fixed
+ - changed TimeToLive broker property to a float: [PR #20](https://github.com/AymDev/MessengerAzureBundle/pull/20)
+
+### Changed
+- upgraded minimum supported version to **PHP 8.4** and **Symfony 6.4**
 
 ## [2.0.0] - 2024-02-14
 ### Removed

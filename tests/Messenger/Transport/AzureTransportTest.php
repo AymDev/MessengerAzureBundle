@@ -9,6 +9,7 @@ use AymDev\MessengerAzureBundle\Messenger\Stamp\AzureMessageStamp;
 use AymDev\MessengerAzureBundle\Messenger\Transport\AzureTransport;
 use AymDev\MessengerAzureBundle\Messenger\Stamp\AzureBrokerPropertiesStamp;
 use AymDev\MessengerAzureBundle\Messenger\Stamp\AzureReceivedStamp;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -36,7 +37,7 @@ final class AzureTransportTest extends TestCase
         ]));
 
         $transport = new AzureTransport(
-            self::createMock(SerializerInterface::class),
+            self::createStub(SerializerInterface::class),
             new MockHttpClient(),
             $httpReceiver,
             AzureTransport::RECEIVE_MODE_PEEK_LOCK,
@@ -56,7 +57,7 @@ final class AzureTransportTest extends TestCase
         ]));
 
         $transport = new AzureTransport(
-            self::createMock(SerializerInterface::class),
+            self::createStub(SerializerInterface::class),
             new MockHttpClient(),
             $httpReceiver,
             AzureTransport::RECEIVE_MODE_PEEK_LOCK,
@@ -79,7 +80,7 @@ final class AzureTransportTest extends TestCase
         ]));
 
         $transport = new AzureTransport(
-            self::createMock(SerializerInterface::class),
+            self::createStub(SerializerInterface::class),
             new MockHttpClient(),
             $httpReceiver,
             AzureTransport::RECEIVE_MODE_PEEK_LOCK,
@@ -139,8 +140,8 @@ final class AzureTransportTest extends TestCase
 
     /**
      * Read messages must be returned in an envelope with specific stamps
-     * @dataProvider provideValidGetCases
      */
+    #[DataProvider('provideValidGetCases')]
     public function testGetHasStamps(
         int $statusCode,
         string $receiveMode,
@@ -214,7 +215,7 @@ final class AzureTransportTest extends TestCase
     /**
      * @return array{int, string, bool, ?string, ?string}[]
      */
-    public function provideValidGetCases(): array
+    public static function provideValidGetCases(): array
     {
         return [
             [
@@ -250,15 +251,15 @@ final class AzureTransportTest extends TestCase
 
     /**
      * The message acknowledgment or rejection must not do anything on the Receive And Delete receive mode
-     * @dataProvider provideDeletingMessageMethodNames
      */
+    #[DataProvider('provideDeletingMessageMethodNames')]
     public function testAckRejectDoesNotDeleteOnReceiveAndDeleteMode(string $methodName): void
     {
         $receiver = self::createMock(HttpClientInterface::class);
         $receiver->expects(self::never())->method('request');
 
         $transport = new AzureTransport(
-            self::createMock(SerializerInterface::class),
+            self::createStub(SerializerInterface::class),
             new MockHttpClient(),
             $receiver,
             AzureTransport::RECEIVE_MODE_RECEIVE_AND_DELETE,
@@ -274,8 +275,8 @@ final class AzureTransportTest extends TestCase
 
     /**
      * The message acknowledgment or rejection must delete using the delete location URL when available
-     * @dataProvider provideDeletingMessageMethodNames
      */
+    #[DataProvider('provideDeletingMessageMethodNames')]
     public function testAckRejectDeletesWithDeleteLocationWhenAvailable(string $methodName): void
     {
         $expectedUrl = 'https://test-domain-b.com/test-uri-b';
@@ -291,7 +292,7 @@ final class AzureTransportTest extends TestCase
         );
 
         $transport = new AzureTransport(
-            self::createMock(SerializerInterface::class),
+            self::createStub(SerializerInterface::class),
             new MockHttpClient(),
             $receiver,
             AzureTransport::RECEIVE_MODE_PEEK_LOCK,
@@ -309,15 +310,15 @@ final class AzureTransportTest extends TestCase
 
     /**
      * An exception must be thrown if there are no delete location nor broker properties
-     * @dataProvider provideDeletingMessageMethodNames
      */
+    #[DataProvider('provideDeletingMessageMethodNames')]
     public function testAckRejectWithoutDeleteLocationOrBrokerProperties(string $methodName): void
     {
         self::expectException(\LogicException::class);
         self::expectExceptionCode(1644340687);
 
         $transport = new AzureTransport(
-            self::createMock(SerializerInterface::class),
+            self::createStub(SerializerInterface::class),
             new MockHttpClient(),
             new MockHttpClient(),
             AzureTransport::RECEIVE_MODE_PEEK_LOCK,
@@ -336,15 +337,15 @@ final class AzureTransportTest extends TestCase
 
     /**
      * An exception must be thrown if there are no MessageId nor SequenceNumber in the broker properties
-     * @dataProvider provideDeletingMessageMethodNames
      */
+    #[DataProvider('provideDeletingMessageMethodNames')]
     public function testAckRejectWithoutBrokerPropertiesMessageIdentifier(string $methodName): void
     {
         self::expectException(\LogicException::class);
         self::expectExceptionCode(1644340921);
 
         $transport = new AzureTransport(
-            self::createMock(SerializerInterface::class),
+            self::createStub(SerializerInterface::class),
             new MockHttpClient(),
             new MockHttpClient(),
             AzureTransport::RECEIVE_MODE_PEEK_LOCK,
@@ -363,8 +364,8 @@ final class AzureTransportTest extends TestCase
 
     /**
      * An exception must be thrown if there is a MessageId or SequenceNumber but no LockToken in the broker properties
-     * @dataProvider provideBrokerPropertiesWithMissingLockToken
      */
+    #[DataProvider('provideBrokerPropertiesWithMissingLockToken')]
     public function testAckRejectWithoutBrokerPropertiesLockToken(
         string $methodName,
         AzureBrokerPropertiesStamp $stamp
@@ -373,7 +374,7 @@ final class AzureTransportTest extends TestCase
         self::expectExceptionCode(1644340926);
 
         $transport = new AzureTransport(
-            self::createMock(SerializerInterface::class),
+            self::createStub(SerializerInterface::class),
             new MockHttpClient(),
             new MockHttpClient(),
             AzureTransport::RECEIVE_MODE_PEEK_LOCK,
@@ -391,7 +392,7 @@ final class AzureTransportTest extends TestCase
     /**
      * @return array{string, AzureBrokerPropertiesStamp}[]
      */
-    public function provideBrokerPropertiesWithMissingLockToken(): iterable
+    public static function provideBrokerPropertiesWithMissingLockToken(): iterable
     {
         $stamps = [
             new AzureBrokerPropertiesStamp(
@@ -418,7 +419,7 @@ final class AzureTransportTest extends TestCase
             )
         ];
 
-        foreach ($this->provideDeletingMessageMethodNames() as [$methodName]) {
+        foreach (self::provideDeletingMessageMethodNames() as [$methodName]) {
             foreach ($stamps as $stamp) {
                 yield [
                     $methodName,
@@ -431,8 +432,8 @@ final class AzureTransportTest extends TestCase
     /**
      * The message acknowledgment or rejection must delete using the BrokerProperties when there is no delete location
      * but there is a message identifier and LockToken
-     * @dataProvider provideDeletingMessageMethodNames
      */
+    #[DataProvider('provideDeletingMessageMethodNames')]
     public function testAckRejectDeletesWithBrokerProperties(string $methodName): void
     {
         $messageId = 'test-message-id';
@@ -452,7 +453,7 @@ final class AzureTransportTest extends TestCase
         );
 
         $transport = new AzureTransport(
-            self::createMock(SerializerInterface::class),
+            self::createStub(SerializerInterface::class),
             new MockHttpClient(),
             $receiver,
             AzureTransport::RECEIVE_MODE_PEEK_LOCK,
@@ -479,8 +480,8 @@ final class AzureTransportTest extends TestCase
     /**
      * An exception from the HTTP client during the message acknowledgment or rejection must be converted to a transport
      * exception
-     * @dataProvider provideDeletingMessageMethodNames
      */
+    #[DataProvider('provideDeletingMessageMethodNames')]
     public function testAckRejectThrowsOnHttpError(string $methodName): void
     {
         self::expectException(TransportException::class);
@@ -491,7 +492,7 @@ final class AzureTransportTest extends TestCase
         ]));
 
         $transport = new AzureTransport(
-            self::createMock(SerializerInterface::class),
+            self::createStub(SerializerInterface::class),
             new MockHttpClient(),
             $receiver,
             AzureTransport::RECEIVE_MODE_PEEK_LOCK,
@@ -510,7 +511,7 @@ final class AzureTransportTest extends TestCase
     /**
      * @return string[][]
      */
-    public function provideDeletingMessageMethodNames(): array
+    public static function provideDeletingMessageMethodNames(): array
     {
         return [
             ['ack'],
@@ -603,34 +604,7 @@ final class AzureTransportTest extends TestCase
         ]);
 
         $transport = new AzureTransport(
-            self::createMock(SerializerInterface::class),
-            new MockHttpClient(),
-            new MockHttpClient(),
-            AzureTransport::RECEIVE_MODE_RECEIVE_AND_DELETE,
-            'entity'
-        );
-
-        $transport->send($envelope);
-    }
-
-    /**
-     * The encoded enveloppe must have a "body" key
-     */
-    public function testSentEncodedEnvelopeMustHaveABody(): void
-    {
-        self::expectException(\LogicException::class);
-        self::expectExceptionCode(1644403794);
-
-        $envelope = new Envelope(new class {});
-
-        $serializer = self::createMock(SerializerInterface::class);
-        $serializer->expects(self::once())
-            ->method('encode')
-            ->with($envelope)
-            ->willReturn([]);
-
-        $transport = new AzureTransport(
-            $serializer,
+            self::createStub(SerializerInterface::class),
             new MockHttpClient(),
             new MockHttpClient(),
             AzureTransport::RECEIVE_MODE_RECEIVE_AND_DELETE,

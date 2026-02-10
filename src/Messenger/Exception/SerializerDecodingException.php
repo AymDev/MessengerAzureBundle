@@ -21,7 +21,7 @@ final class SerializerDecodingException extends MessageDecodingFailedException
     /**
      * @param Envelope $envelope an envelope with an empty message
      */
-    public function __construct(Envelope $envelope, string $message = "", int $code = 0, Throwable $previous = null)
+    public function __construct(Envelope $envelope, string $message = "", int $code = 0, ?Throwable $previous = null)
     {
         parent::__construct($message, $code, $previous);
         $this->envelope = $envelope;

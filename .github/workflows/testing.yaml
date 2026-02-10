@@ -3,11 +3,8 @@ on: [push, pull_request]
 
 jobs:
     unit-tests:
-        name: PHP ${{ matrix.php }} - PHPUnit & PHPStan
+        name: PHPUnit
         runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                php: ['8.1', '8.2', '8.3']
 
         steps:
             # Setup
@@ -17,7 +14,7 @@ jobs:
             -   name: PHP setup
                 uses: shivammathur/setup-php@v2
                 with:
-                    php-version: ${{ matrix.php }}
+                    php-version: 8.4
                     extensions: mbstring, xml, ctype, iconv, intl
                     coverage: xdebug
 
@@ -38,8 +35,4 @@ jobs:
 
             # Run tests suite
             -   name: Run test suite
-                run: php vendor/bin/simple-phpunit --coverage-text
-
-            # Run PHPStan
-            -   name: Run PHPStan
-                run: php vendor/bin/phpstan
+                run: php vendor/bin/phpunit

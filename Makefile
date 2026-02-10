@@ -1,6 +1,6 @@
 .PHONY: tests
 tests:
-	php ./vendor/bin/simple-phpunit
+	php ./vendor/bin/phpunit
 
 .PHONY: analysis
 analysis:
